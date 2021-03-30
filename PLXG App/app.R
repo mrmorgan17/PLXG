@@ -15,6 +15,7 @@ ui <- fluidPage(
                       helpText('2017-2018'),
                       helpText('2018-2019'),
                       helpText('2019-2020'),
+                      helpText('Code for scraping FBref is available ', a('here', href = 'https://fbref.com/en/'), 'on my GitHub profile'),
                       br(),
                       helpText('')),
              tabPanel('Calculate',
@@ -47,37 +48,37 @@ ui <- fluidPage(
                                        min = 0, 
                                        max = 100),
                           
-                          numericInput('SCA_PassLive', 'Completed live-ball passes that lead to a shot attempt (PassLive):', 
+                          numericInput('SCA_Total', 'The two offensive actions directly leading to a shot, such as passes, dribbles and drawing fouls. (SCA):', 
                                        0, 
                                        min = 0, 
                                        max = 100),
                           
-                          numericInput('Short_Att', 'Passes attempted between 5 and 15 yards (Short_Att):', 
+                          numericInput('Short_Cmp', 'Passes completed between 5 and 15 yards (Short_Att):', 
                                        0, 
                                        min = 0, 
                                        max = 1000),
-                          
-                          numericInput('Dist', 'Average distance, in yards, from goal of all shots taken (Does not include penalty kicks) (Dist):', 
-                                       0, 
-                                       min = 0, 
-                                       max = 100),
-                          
-                          numericInput('Clr', 'Opposing Team Clearances (Clr):', 
-                                       0, 
-                                       min = 0, 
-                                       max = 100),
-                          
-                          numericInput('TklW', 'Tackles in which the opposing team won possession of the ball (TklW):', 
-                                       0, 
-                                       min = 0, 
-                                       max = 100),
                           
                           numericInput('TB', 'Completed passes sent between back defenders into open space (TB):', 
                                        0, 
                                        min = 0, 
                                        max = 100),
                           
-                          numericInput('Crosses_Att', 'Crosses Attempted (Crosses_Att):', 
+                          numericInput('Dead', 'Dead-ball passes (Includes free kicks, corner kicks, kick offs, throw-ins and goal kicks) (Dead):', 
+                                       0, 
+                                       min = 0, 
+                                       max = 100),
+                
+                          numericInput('Clr', 'Opposing Team Clearances (Clr):', 
+                                       0, 
+                                       min = 0, 
+                                       max = 100),
+                          
+                          numericInput('Dist', 'Average distance, in yards, from goal of all shots taken (Does not include penalty kicks) (Dist):', 
+                                       0, 
+                                       min = 0, 
+                                       max = 100),
+                          
+                          numericInput('TklW', 'Tackles in which the opposing team won possession of the ball (TklW):', 
                                        0, 
                                        min = 0, 
                                        max = 100),
@@ -128,24 +129,24 @@ server <- function(input, output) {
                             'SoT',
                             'Opp_Saves',
                             'PKatt',
-                            'PassLive',
-                            'Short_Att',
-                            'Dist',
-                            'Clr',
-                            'TklW',
+                            'SCA',
+                            'Short_Cmp',
                             'TB',
-                            'Crosses_Att'),
+                            'Dead',
+                            'Clr',
+                            'Dist',
+                            'TklW'),
                Value = c(PL_10 %>% filter(Team == input$Team) %>% pull(Team),
                          round(PL_10 %>% filter(Team == input$Team) %>% pull(SoT), digits = 2),
                          round(PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves), digits = 2),
                          round(PL_10 %>% filter(Team == input$Team) %>% pull(PKatt), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(SCA_PassLive), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Short_Att), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Dist), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Clr), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(TklW), digits = 2),
+                         round(PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total), digits = 2),
+                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp), digits = 2),
                          round(PL_10 %>% filter(Team == input$Team) %>% pull(TB), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Crosses_Att), digits = 2)))
+                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Dead), digits = 2),
+                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Clr), digits = 2),
+                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Dist), digits = 2),
+                         round(PL_10 %>% filter(Team == input$Team) %>% pull(TklW), digits = 2)))
       
   })
   
@@ -155,13 +156,13 @@ server <- function(input, output) {
                SoT = ifelse(input$SoT != PL_10 %>% filter(Team == input$Team) %>% pull(SoT), input$SoT, PL_10 %>% filter(Team == input$Team) %>% pull(SoT)),
                Opp_Saves = ifelse(input$Opp_Saves != PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves), input$Opp_Saves, PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves)),
                PKatt = ifelse(input$PKatt != PL_10 %>% filter(Team == input$Team) %>% pull(PKatt), input$PKatt, PL_10 %>% filter(Team == input$Team) %>% pull(PKatt)),
-               SCA_PassLive = ifelse(input$SCA_PassLive != PL_10 %>% filter(Team == input$Team) %>% pull(SCA_PassLive), input$SCA_PassLive, PL_10 %>% filter(Team == input$Team) %>% pull(SCA_PassLive)),
-               Short_Att = ifelse(input$Short_Att != PL_10 %>% filter(Team == input$Team) %>% pull(Short_Att), input$Short_Att, PL_10 %>% filter(Team == input$Team) %>% pull(Short_Att)),
-               Dist = ifelse(input$Dist != PL_10 %>% filter(Team == input$Team) %>% pull(Dist), input$Dist, PL_10 %>% filter(Team == input$Team) %>% pull(Dist)),
-               Clr = ifelse(input$Clr != PL_10 %>% filter(Team == input$Team) %>% pull(Clr), input$Clr, PL_10 %>% filter(Team == input$Team) %>% pull(Clr)),
-               TklW = ifelse(input$TklW != PL_10 %>% filter(Team == input$Team) %>% pull(TklW), input$TklW, PL_10 %>% filter(Team == input$Team) %>% pull(TklW)),
+               SCA_Total = ifelse(input$SCA_Total != PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total), input$SCA_Total, PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total)),
+               Short_Cmp = ifelse(input$Short_Cmp != PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp), input$Short_Cmp, PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp)),
                TB = ifelse(input$TB != PL_10 %>% filter(Team == input$Team) %>% pull(TB), input$TB, PL_10 %>% filter(Team == input$Team) %>% pull(TB)),
-               Crosses_Att = ifelse(input$Crosses_Att != PL_10 %>% filter(Team == input$Team) %>% pull(Crosses_Att), input$Crosses_Att, PL_10 %>% filter(Team == input$Team) %>% pull(Crosses_Att)))
+               Dead = ifelse(input$Dead != PL_10 %>% filter(Team == input$Team) %>% pull(Dead), input$Dead, PL_10 %>% filter(Team == input$Team) %>% pull(Dead)),
+               Clr = ifelse(input$Clr != PL_10 %>% filter(Team == input$Team) %>% pull(Clr), input$Clr, PL_10 %>% filter(Team == input$Team) %>% pull(Clr)),
+               Dist = ifelse(input$Dist != PL_10 %>% filter(Team == input$Team) %>% pull(Dist), input$Dist, PL_10 %>% filter(Team == input$Team) %>% pull(Dist)),
+               TklW = ifelse(input$TklW != PL_10 %>% filter(Team == input$Team) %>% pull(TklW), input$TklW, PL_10 %>% filter(Team == input$Team) %>% pull(TklW)))
     
   })
   

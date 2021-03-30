@@ -13,64 +13,50 @@ pl_season_href <- pl_season_list %>%
   html_attr("href") %>% 
   data.frame() 
 
-# Extract the unique identifier for each season
+test <- pl_season_href[2,]
+
 season_tag <- str_extract_all(pl_season_href[,1], '[:graph:]+(?=\\-Premier)') %>% 
   str_split(., '\\/') %>% 
   unlist() %>% 
   .[seq(6, length(.), 6)]
-
-# Extract the years for which the season ran (ex: 2019-2020)
+  
 season <- str_extract_all(pl_season_href[,1], '[:graph:]+(?=\\-Premier)') %>% 
   str_split(., '\\/') %>% 
   unlist() %>% 
   .[seq(7, length(.), 6)]
 
-# Create a data frame with each season and its unique identifier
 pl_season_href <- data.frame(season = season, season_tag = season_tag)
 
-pl_team_list <- list()
-pl_team_df <- list()
-pl_team_href <- list()
-team_tag <- list()
-team <- list()
-pl_teams <- list()
+pl_team_list <- read_html("https://fbref.com/en/comps/9/3232/2019-2020-Premier-League-Stats")
 
-for (i in 1:3) {
-  pl_team_list[[i]] <- read_html(paste0('https://fbref.com/en/comps/9/', season_tag[i], '/', season[i], '-Premier-League-Stats'))
-  
-  pl_team_df[[i]] <- pl_team_list[[i]] %>% 
-    html_table()
-  
-  pl_team_href[[i]] <- pl_team_list[[i]] %>% 
-    html_nodes("td") %>%
-    html_nodes("a") %>%
-    html_attr("href") %>% 
-    data.frame() %>% 
-    filter(str_detect(., 'squads') == TRUE) %>% 
-    unique()
-  
-  # Extract the unique identifier for each Premier League team
-  team_tag[[i]] <- do.call(rbind, str_extract_all(pl_team_href[[i]][,1], '(?<=\\/)[:alnum:]{8}(?=\\/)'))
-  
-  # Extract the name of the team (ex: Manchester-United)
-  team[[i]] <- str_extract_all(pl_team_href[[i]][,1], '[:graph:]+(?=\\-Stats)') %>% 
-    str_split(., '\\/') %>% 
-    unlist() %>% 
-    .[seq(6, length(.), 6)]
-  
-  # Create a one row data frame with the team name, their unique identifier, the season, and the season's unique identifier
-  pl_teams[[i]] <- data.frame(team = team[[i]], team_tag = team_tag[[i]], season = season[i], season_tag = season_tag[i])
-}
+pl_team_df <- pl_team_list %>%
+  html_table()
 
-# Bind all the elements of the list together into a data frame
-pl_teams <- do.call(rbind, pl_teams)
+pl_team_href <- pl_team_list %>% 
+  html_nodes("td") %>%
+  html_nodes("a") %>%
+  html_attr("href") %>% 
+  data.frame() %>% 
+  filter(str_detect(., 'squads') == TRUE) %>% 
+  unique()
 
-# Labeling the tbale types to reference in calling the right html addresses
+team_tag <- do.call(rbind, str_extract_all(pl_team_href[,1], '(?<=\\/)[:alnum:]{8}(?=\\/)'))
+
+team <- str_extract_all(pl_team_href[,1], '[:graph:]+(?=\\-Stats)') %>% 
+  str_split(., '\\/') %>% 
+  unlist() %>% 
+  .[seq(6, length(.), 6)]
+
+pl_team_href <- data.frame(team = team, team_tag = team_tag)
+
+# 7 Different tables to read in...
 table_types = c('shooting', 'keeper', 'passing', 'passing_types', 'gca', 'defense', 'possession')
 
-##############
-## Shooting ##
-##############
+paste0('https://fbref.com/en/squads/', team_tag[1], '/2019-2020/matchlogs/s3232/', table_types[1], '/', team[1], '-Match-Logs-Premier-League')
+
+shooting <- xml2::read_html(paste0('https://fbref.com/en/squads/', href[1], '/2019-2020/matchlogs/s3232/', table_types[1], '/', team[1], '-Match-Logs-Premier-League')) %>% 
+  rvest::html_table() %>%
+  data.frame()
 
 # Date -- Date listed is local to the match
 # Time -- Time listed is local to the match venue
@@ -90,25 +76,35 @@ table_types = c('shooting', 'keeper', 'passing', 'passing_types', 'gca', 'defens
 # PK -- Penalty Kicks Made
 # PKatt -- Penalty Kicks Attempted
 
+names(shooting) <- shooting[1,]
+
+shooting <- cbind(shooting[seq(2, nrow(shooting) - 2, by = 2),] %>% select(Goals = GF, Round, Venue, Opponent, Sh, SoT, Dist, FK, PKatt),
+                  shooting[seq(3, nrow(shooting) - 2, by = 2),] %>% select(Opp_Sh = Sh, Opp_SoT = SoT, Opp_Dist = Dist, Opp_FK = FK, Opp_PKatt = PKatt))
+
+ForMC <- MCshooting[seq(2, nrow(MCshooting) - 2, by = 2),] %>% select(Goals = GF, Round, Venue, Opponent, Sh, SoT, Dist, FK, PKatt)
+AgainstMC <- MCshooting[seq(3, nrow(MCshooting) - 2, by = 2),] %>% select(Opp_Sh = Sh, Opp_SoT = SoT, Opp_Dist = Dist, Opp_FK = FK, Opp_PKatt = PKatt)
+
 Pl_team_shooting <- list()
 
-for (i in 1:nrow(pl_teams)) {
-  Pl_team_shooting[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', pl_teams$team_tag[i], '/', pl_teams$season[i], '/matchlogs/s', pl_teams$season_tag[i], '/', table_types[1], '/', pl_teams$team[i], '-Match-Logs-Premier-League')) %>% 
+for (i in 1:length(team_tag)) {
+  Pl_team_shooting[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', team_tag[i], '/2019-2020/matchlogs/s3232/', table_types[1], '/', team[i], '-Match-Logs-Premier-League')) %>% 
     rvest::html_table() %>%
     data.frame()
   
   names(Pl_team_shooting[[i]]) <- Pl_team_shooting[[i]][1,]
   
-  Pl_team_shooting[[i]]$Team <- pl_teams$team[i]
+  Pl_team_shooting[[i]]$Team <- team[i]
   
-  Pl_team_shooting[[i]] <- Pl_team_shooting[[i]][seq(2, nrow(Pl_team_shooting[[i]]) - 2, by = 2),] %>% select(Goals = GF, Team, Date, Round, Venue, Opponent, Sh, SoT, Dist, FK, PKatt)
+  Pl_team_shooting[[i]] <-  Pl_team_shooting[[i]][seq(2, nrow(Pl_team_shooting[[i]]) - 2, by = 2),] %>% select(Goals = GF, Team, Round, Venue, Opponent, Sh, SoT, Dist, FK, PKatt)
 }
 
 Pl_team_shooting_df <- do.call(rbind, Pl_team_shooting)
 
-############
-## Keeper ##
-############
+names(Pl_team_shooting_df) <- c('Goals', 'Team', 'Round', 'Venue', 'Opponent', 'Sh', 'SoT', 'Shot_Dist', 'Shot_FK', 'Shot_PKAtt')
+
+keeper <- xml2::read_html(paste0('https://fbref.com/en/squads/', href[10], '/2019-2020/matchlogs/s3232/', table_types[2], '/', team[10], '-Match-Logs-Premier-League')) %>% 
+  rvest::html_table() %>%
+  data.frame()
 
 # Performance
 # Saves -- Saves made
@@ -144,10 +140,14 @@ Pl_team_shooting_df <- do.call(rbind, Pl_team_shooting)
 # #OPA -- # of defensive actions outside of penalty area
 # AvgDist -- Average distance from goal (in yards) of all defensive actions
 
+keeper <- keeper[seq(3, nrow(keeper) - 2, by = 2),] %>% select(12, 21, 22, 24, 25, 27, 28, 30, 31, 32, 34, 35)
+
+names(keeper) <- c('Opp_Saves', 'Opp_Launched_Cmp', 'Opp_Launched_Att', 'Opp_Passes_Att', 'Opp_Thr_Att', 'Opp_Passes_AvgLen', 'Opp_GK_Att', 'Opp_GK_AvgLen', 'Crosses_Att', 'Opp_Crosses_Stp', 'Opp_#OPA', 'Opp_AvgDist')
+
 Pl_team_keeper <- list()
 
-for (i in 1:nrow(pl_teams)) {
-  Pl_team_keeper[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', pl_teams$team_tag[i], '/', pl_teams$season[i], '/matchlogs/s', pl_teams$season_tag[i], '/', table_types[2], '/', pl_teams$team[i], '-Match-Logs-Premier-League')) %>% 
+for (i in 1:length(team_tag)) {
+  Pl_team_keeper[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', team_tag[i], '/2019-2020/matchlogs/s3232/', table_types[2], '/', team[i], '-Match-Logs-Premier-League')) %>% 
     rvest::html_table() %>%
     data.frame()
   
@@ -158,9 +158,9 @@ for (i in 1:nrow(pl_teams)) {
 
 Pl_team_keeper_df <- do.call(rbind, Pl_team_keeper)
 
-#############
-## Passing ##
-#############
+passing <- xml2::read_html(paste0('https://fbref.com/en/squads/', href[1], '/2019-2020/matchlogs/s3232/', table_types[3], '/', team[1], '-Match-Logs-Premier-League')) %>% 
+  rvest::html_table() %>%
+  data.frame()
 
 # Total
 # Cmp -- Passes Completed
@@ -186,19 +186,23 @@ Pl_team_keeper_df <- do.call(rbind, Pl_team_keeper)
 #
 # Ast -- Assists
 # xA -- xG Assisted
-# xG which follows a pass that assists a shot
-# Provided by StatsBomb.
-# An underline indicates there is a match that is missing data, but will be updated when available.
+  # xG which follows a pass that assists a shot
+  # Provided by StatsBomb.
+  # An underline indicates there is a match that is missing data, but will be updated when available.
 # KP -- Passes that directly lead to a shot (assisted shots)
 # 1/3 -- Completed passes that enter the 1/3 of the pitch closest to the goal (Not including set pieces)
 # PPA -- Completed passes into the 18-yard box (Not including set pieces)
 # CrsPA -- Completed crosses into the 18-yard box (Not including set pieces)
 # Prog -- Progressive Passes, completed passes that move the ball towards the opponent's goal at least 10 yards from its furthest point in the last six passes, or any completed pass into the penalty area. (Excludes passes from the defending 40% of the pitch)
 
+passing <- passing[seq(2, nrow(passing) - 2, by = 2),] %>% select(13:16, 18, 19, 21, 22, 26:30)
+
+names(passing) <- c('TotDist', 'ProgDist', 'Short_Cmp', 'Short_Att', 'Med_Cmp', 'Med_Att', 'Long_Cmp', 'Long_Att', 'KP', '1/3', 'PPA', 'CrsPA', 'Prog')
+
 Pl_team_passing <- list()
 
-for (i in 1:nrow(pl_teams)) {
-  Pl_team_passing[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', pl_teams$team_tag[i], '/', pl_teams$season[i], '/matchlogs/s', pl_teams$season_tag[i], '/', table_types[3], '/', pl_teams$team[i], '-Match-Logs-Premier-League')) %>% 
+for (i in 1:length(team_tag)) {
+  Pl_team_passing[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', team_tag[i], '/2019-2020/matchlogs/s3232/', table_types[3], '/', team[i], '-Match-Logs-Premier-League')) %>% 
     rvest::html_table() %>%
     data.frame()
   
@@ -209,9 +213,9 @@ for (i in 1:nrow(pl_teams)) {
 
 Pl_team_passing_df <- do.call(rbind, Pl_team_passing)
 
-###################
-## Passing Types ##
-###################
+passing_types <- xml2::read_html(paste0('https://fbref.com/en/squads/', href[1], '/2019-2020/matchlogs/s3232/', table_types[4], '/', team[1], '-Match-Logs-Premier-League')) %>% 
+  rvest::html_table() %>%
+  data.frame()
 
 # Pass Types
 # Live -- Live-ball passes
@@ -247,28 +251,32 @@ Pl_team_passing_df <- do.call(rbind, Pl_team_passing)
 # Int -- Intercepted
 # Blocks -- Blocked by the opponent who was standing it the path
 
+names(passing_types) <- c(passing_types[1,1:18], 'CK_In', 'CK_Out', 'CK_Str', passing_types[1, 22:34])
+
+passing_types <- passing_types[seq(2, nrow(passing_types) - 2, by = 2),] %>% select(11:29, 31:32)
+
 Pl_team_passing_types <- list()
 
-for (i in 1:nrow(pl_teams)) {
-  Pl_team_passing_types[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', pl_teams$team_tag[i], '/', pl_teams$season[i], '/matchlogs/s', pl_teams$season_tag[i], '/', table_types[4], '/', pl_teams$team[i], '-Match-Logs-Premier-League')) %>% 
+for (i in 1:length(team_tag)) {
+  Pl_team_passing_types[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', team_tag[i], '/2019-2020/matchlogs/s3232/', table_types[4], '/', team[i], '-Match-Logs-Premier-League')) %>% 
     rvest::html_table() %>%
     data.frame()
   
-  names(Pl_team_passing_types[[i]]) <- c(Pl_team_passing_types[[i]][1,1:12], 'Pass_Att_FK', Pl_team_passing_types[[i]][1,14:18], 'CK_In', 'CK_Out', 'CK_Str', Pl_team_passing_types[[i]][1, 22:34])
+  names(Pl_team_passing_types[[i]]) <- c(Pl_team_passing_types[[i]][1,1:18], 'CK_In', 'CK_Out', 'CK_Str', Pl_team_passing_types[[i]][1, 22:34])
   
   Pl_team_passing_types[[i]] <- Pl_team_passing_types[[i]][seq(2, nrow(Pl_team_passing_types[[i]]) - 2, by = 2),] %>% select(11:29, 31:32)
 }
 
 Pl_team_passing_types_df <- do.call(rbind, Pl_team_passing_types)
 
-#################################
-## GCA (Goal Creating Actions) ##
-#################################
+gca <- xml2::read_html(paste0('https://fbref.com/en/squads/', team_tag[1], '/2019-2020/matchlogs/s3232/', table_types[5], '/', team[1], '-Match-Logs-Premier-League')) %>% 
+  rvest::html_table() %>%
+  data.frame()
 
 # SCA Types
 # SCA -- Shot-Creating Actions
-# The two offensive actions directly leading to a shot, such as passes, dribbles and drawing fouls.
-# Note: A single player can receive credit for multiple actions and the shot-taker can also receive credit.
+  # The two offensive actions directly leading to a shot, such as passes, dribbles and drawing fouls.
+  # Note: A single player can receive credit for multiple actions and the shot-taker can also receive credit.
 # PassLive -- Completed live-ball passes that lead to a shot attempt
 # PassDead -- Completed dead-ball passes that lead to a shot attempt.
 # Includes free kicks, corner kicks, kick offs, throw-ins and goal kicks
@@ -277,10 +285,10 @@ Pl_team_passing_types_df <- do.call(rbind, Pl_team_passing_types)
 # Fld -- Fouls drawn that lead to a shot attempt
 # Def -- Defensive actions that lead to a shot attempt
 #
-# GCA Types 
+# GCA Types
 # GCA -- Goal-Creating Actions
-# The two offensive actions directly leading to a goal, such as passes, dribbles and drawing fouls. 
-# Note: A single player can receive credit for multiple actions and the shot-taker can also receive credit.
+  # The two offensive actions directly leading to a goal, such as passes, dribbles and drawing fouls. 
+  # Note: A single player can receive credit for multiple actions and the shot-taker can also receive credit.
 # PassLive -- Completed live-ball passes that lead to a goal
 # PassDead -- Completed dead-ball passes that lead to a goal. Includes free kicks, corner kicks, kick offs, throw-ins and goal kicks
 # Drib -- Successful dribbles that lead to a goal
@@ -289,12 +297,14 @@ Pl_team_passing_types_df <- do.call(rbind, Pl_team_passing_types)
 # Def -- Defensive actions that lead to a goal
 # OG -- Actions that led directly to an opponent scoring on their own goal
 
-# * GCA types won't be used to prevent leakage
+gca <- gca[seq(2, nrow(gca) - 2, by = 2),] %>% select(10:16)
+
+names(gca) <- c('SCA_Total', 'SCA_PassLive', 'SCA_PassDead', 'SCA_Drib', 'SCA_Sh', 'SCA_Fld', 'SCA_Def')
 
 Pl_team_gca <- list()
 
-for (i in 1:nrow(pl_teams)) {
-  Pl_team_gca[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', pl_teams$team_tag[i], '/', pl_teams$season[i], '/matchlogs/s', pl_teams$season_tag[i], '/', table_types[5], '/', pl_teams$team[i], '-Match-Logs-Premier-League')) %>% 
+for (i in 1:length(team_tag)) {
+  Pl_team_gca[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', team_tag[i], '/2019-2020/matchlogs/s3232/', table_types[5], '/', team[i], '-Match-Logs-Premier-League')) %>% 
     rvest::html_table() %>%
     data.frame()
   
@@ -305,9 +315,9 @@ for (i in 1:nrow(pl_teams)) {
 
 Pl_team_gca_df <- do.call(rbind, Pl_team_gca)
 
-#############
-## Defense ##
-#############
+defense <- xml2::read_html(paste0('https://fbref.com/en/squads/', team_tag[1], '/2019-2020/matchlogs/s3232/', table_types[6], '/', team[1], '-Match-Logs-Premier-League')) %>% 
+  rvest::html_table() %>%
+  data.frame()
 
 # Tackles
 # Tkl -- Number of players tackled
@@ -341,10 +351,18 @@ Pl_team_gca_df <- do.call(rbind, Pl_team_gca)
 # Clr -- Clearances
 # Err -- Mistakes leading to an opponent's shot
 
+defense <- defense[seq(3, nrow(defense) - 2, by = 2),] %>% select(10:15, 18, 20, 22:24, 26:29, 31:32)
+
+names(defense) <- c('Players_Tkl', 'TklW', 'Tkl_Def_3rd', 'Tkl_Mid_3rd', 'Tkl_Att_3rd',
+                    'Dribblers_Tkl', 'Dribblers_Past',
+                    'Press_Succ', 'Press_Def_3rd', 'Press_Mid_3rd', 'Press_Att_3rd',
+                    'Blocks_Sh', 'Blocks_ShSv', 'Blocks_Pass',
+                    'Int', 'Clr', 'Err')
+
 Pl_team_defense <- list()
 
-for (i in 1:nrow(pl_teams)) {
-  Pl_team_defense[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', pl_teams$team_tag[i], '/', pl_teams$season[i], '/matchlogs/s', pl_teams$season_tag[i], '/', table_types[6], '/', pl_teams$team[i], '-Match-Logs-Premier-League')) %>% 
+for (i in 1:length(team_tag)) {
+  Pl_team_defense[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', team_tag[i], '/2019-2020/matchlogs/s3232/', table_types[6], '/', team[i], '-Match-Logs-Premier-League')) %>% 
     rvest::html_table() %>%
     data.frame()
   
@@ -359,9 +377,9 @@ for (i in 1:nrow(pl_teams)) {
 
 Pl_team_defense_df <- do.call(rbind, Pl_team_defense)
 
-################
-## Possession ##
-################
+possession <- xml2::read_html(paste0('https://fbref.com/en/squads/', team_tag[1], '/2019-2020/matchlogs/s3232/', table_types[7], '/', team[1], '-Match-Logs-Premier-League')) %>% 
+  rvest::html_table() %>%
+  data.frame()
 
 # Touches
 # Touches -- Number of times a player touched the ball. Note: Receiving a pass, then dribbling, then sending a pass counts as one touch
@@ -398,10 +416,17 @@ Pl_team_defense_df <- do.call(rbind, Pl_team_defense)
 # Minimum 30 minutes played per squad game to qualify as a leader
 # Prog -- Progressive Passes Received, Completed passes that move the ball towards the opponent's goal at least 10 yards from its furthest point in the last six passes, or any completed pass into the penalty area. Excludes passes from the defending 40% of the pitch
 
+possession <- possession[seq(2, nrow(defense) - 2, by = 2),] %>% select(10:18, 20:31, 33)
+
+names(possession) <- c('Touches_Total', 'Touches_Def_Pen', 'Touches_Def_3rd', 'Touches_Mid_3rd', 'Touches_Att_3rd', 'Touches_Att_Pen', 'Touches_Live',
+                       'Dribbles_Succ', 'Dribbles_Att', 'Dribbles_#Pl', 'Dribbles_Megs',
+                       'Carries', 'Carries_TotDist', 'Carries_ProgDist', 'Carries_Prog', 'Carries_1/3', 'Carries_CPA', 'Carries_Mis', 'Carries_Dis',
+                       'Rec_Target', 'Rec_Succ', 'Rec_Prog')
+
 Pl_team_possession <- list()
 
-for (i in 1:nrow(pl_teams)) {
-  Pl_team_possession[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', pl_teams$team_tag[i], '/', pl_teams$season[i], '/matchlogs/s', pl_teams$season_tag[i], '/', table_types[7], '/', pl_teams$team[i], '-Match-Logs-Premier-League')) %>% 
+for (i in 1:length(team_tag)) {
+  Pl_team_possession[[i]] <- xml2::read_html(paste0('https://fbref.com/en/squads/', team_tag[i], '/2019-2020/matchlogs/s3232/', table_types[7], '/', team[i], '-Match-Logs-Premier-League')) %>% 
     rvest::html_table() %>%
     data.frame()
   
@@ -424,3 +449,10 @@ Pl_team_match_data <- cbind(Pl_team_shooting_df,
                             Pl_team_possession_df)
 
 write.csv(Pl_team_match_data, '~/Documents/Stat 495R/Pl_team_match_data.csv', row.names = FALSE)
+
+# Confusion Matrix for multiple class classification
+
+# Team Effects, create a team flag... 0, 1 
+# model.matrix = team dummy variable done 
+# Team factor variable
+# make variables factors
