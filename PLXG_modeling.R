@@ -56,33 +56,33 @@ sqrt(mean((test.Goals - xgbTree.rounded.preds)^2))
 # .3247992
 
 # What are the most important varaibles for xgbTree.model?
-varImp(xgbTree.model)
+varImp(xgbTree.model, scale = FALSE)
 
 # 15 most important variables for xgbTree.model
-# SoT             0.6082823
-# Opp_Saves       0.2798113
-# PKatt           0.0491460
-# Short_Cmp       0.0164546
-# TB              0.0095465
-# Dist            0.0058872
-# Clr             0.0056945
-# Touches_Live    0.0045751
-# TklW            0.0033724
-# Err             0.0026964
-# Crosses_Att     0.0023461
-# Dead            0.0006286
-# Blocks_Sh       0.0006169
-# SCA_PassLive    0.0005878
-# Other           0.0005757
+# SoT              0.5689924
+# Opp_Saves        0.2856196
+# PKatt            0.0438727
+# SCA_Total        0.0370697
+# Short_Cmp        0.0205521
+# TB               0.0077533
+# Dead             0.0057713
+# Clr              0.0056416
+# Dist             0.0031301
+# TklW             0.0031152
+# Err              0.0026727
+# Ground           0.0017426
+# Crosses_Att      0.0015149
+# TI               0.0010820
+# Carries_ProgDist 0.0008998
 
 # Building an xgbTree model with only the 10 most important variables from varImp(xgbTree.model)
 xgbTree2.model <- train(Goals ~ .,
-                        data = pl_team_data.train %>% select(Goals, Team, SoT, Opp_Saves, PKatt, SCA_PassLive, Short_Att, Dist, Clr, TklW, TB, Crosses_Att),
+                        data = pl_team_data.train %>% select(Goals, Team, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW),
                         method = 'xgbTree',
                         trControl = trainControl(method = 'cv', number = 10),
-                        tuneGrid = expand.grid(nrounds = c(400, 450, 500, 550),
+                        tuneGrid = expand.grid(nrounds = c(600, 650, 700, 750),
                                                max_depth = 1,
-                                               eta = c(.3, .31, .32, .325),
+                                               eta = c(.32, .325, .33, .333, .34),
                                                gamma = 0,
                                                colsample_bytree = .8,
                                                min_child_weight = 1,
@@ -199,7 +199,7 @@ Avg_Dat <- do.call(rbind, Avg_Dat)
 Avg_Dat <- Avg_Dat[,c(98, 1:97)]
 
 # Select the Team and the 10 most important variables
-Avg_Dat_10 <- Avg_Dat %>% select(Team, SoT, Opp_Saves, PKatt, SCA_PassLive, Short_Att, Dist, Clr, TklW, TB, Crosses_Att)
+Avg_Dat_10 <- Avg_Dat %>% select(Team, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW)
 
 # Writing out a .csv of each team's averages for the 10 most important variables for xgbTree3.model to be used in the Shint App
 write.csv(Avg_Dat_10, '/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/PL_10.csv', row.names = FALSE)
