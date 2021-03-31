@@ -6,6 +6,11 @@ PLXG.Model <- readRDS('PLXGModel.RData')
 # Define UI for slider demo app ----
 ui <- fluidPage(
   
+  tags$head(tags$style("
+                  #container * {  
+   display: inline;
+                     }")),
+  
   navbarPage('PLXG',
              tabPanel('About',
                       titlePanel('Premier League Expected Goals (PLXG)'),
@@ -99,149 +104,77 @@ ui <- fluidPage(
                       # App title ----
                       titlePanel('Premier League Expected Goals (PLXG)'),
                       
-                      # Sidebar layout with input and output definitions ----
-                      sidebarLayout(
-                        
-                        # Sidebar to select input options for each variable in the model ----
-                        sidebarPanel(
-                          
-                          # Select Premier League Team
-                          selectInput('Team', 'Team:', 
-                                      choices = unique(PL_10$Team)),
-                          
-                          # Input: Simple integer interval ----
-                          numericInput('SoT', 'SoT:', 
-                                       0, 
-                                       min = 0, 
-                                       max = 100),
-                          
-                          numericInput('Opp_Saves', 'Opp_Saves:', 
-                                       0, 
-                                       min = 0, 
-                                       max = 100),
-                          
-                          numericInput('PKatt', 'PKatt:', 
-                                       0, 
-                                       min = 0, 
-                                       max = 100),
-                          
-                          numericInput('SCA_Total', 'SCA:', 
-                                       0, 
-                                       min = 0, 
-                                       max = 100),
-                          
-                          numericInput('Short_Cmp', 'Short_Cmp:', 
-                                       0, 
-                                       min = 0, 
-                                       max = 1000),
-                          
-                          numericInput('TB', 'TB:', 
-                                       0, 
-                                       min = 0, 
-                                       max = 100),
-                          
-                          numericInput('Dead', 'Dead:', 
-                                       0, 
-                                       min = 0, 
-                                       max = 100),
-                
-                          numericInput('Clr', 'Clr:', 
-                                       0, 
-                                       min = 0, 
-                                       max = 100),
-                          
-                          numericInput('Dist', 'Dist:', 
-                                       0, 
-                                       min = 0, 
-                                       max = 100),
-                          
-                          numericInput('TklW', 'TklW:', 
-                                       0, 
-                                       min = 0, 
-                                       max = 100),
-                          
-                          submitButton('Update XG', icon('refresh'))
-                          
-                        ),
-                        
-                        # Main panel for displaying outputs ----
-                        mainPanel(
-                          
-                          # Output: Table summarizing the values entered ----
-                          helpText('Table of team averages for each of the 10 most important variables used in the XGB model'),
-                          
-                          tableOutput('TeamAvg'),
-                          
-                          helpText('Average Expected Goals per Match prediction for the selected team:'),
-                          
-                          textOutput('XG'),
-                          
-                          helpText('Updated Expected Goals per Match prediction for the selected team given user-entered inputs:'),
-                          
-                          textOutput('UpdatedXG'),
-                          
-                          helpText('Difference in Expected Goals per Match prediction (Updated XG - Average XG):'),
-                          
-                          textOutput('DiffXG')
-                          
-                        )
-                      )))
-  
-)
+                      fluidRow(
+                        column(4,
+                               selectInput('Team', 'Team:', 
+                                           choices = unique(PL_10$Team),
+                                           selected = ''),
+                               br(),
+                               actionButton('updateButton', 'Update XG'),
+                               p('Click the button to update the selected teams XG values according to what has been entered by the user.')),
+                        column(2,
+                               conditionalPanel(condition = "input.Team != ''",
+                                                numericInput('SoT', 'SoT:', value = 0, min = 0, max = 100),
+                                                numericInput('Opp_Saves', 'Opp_Saves:',  value = 0, min = 0, max = 100),
+                                                numericInput('PKatt', 'PKatt:', value = 0, min = 0, max = 100),
+                                                numericInput('SCA_Total', 'SCA:', value = 0, min = 0, max = 100),
+                                                numericInput('Short_Cmp', 'Short_Cmp:', value = 0, min = 0, max = 1000)
+                               )),
+                        column(2,
+                               conditionalPanel(condition = "input.Team != ''",
+                                                numericInput('TB', 'TB:', value = 0, min = 0, max = 100),
+                                                numericInput('Dead', 'Dead:', value = 0, min = 0, max = 100),
+                                                numericInput('Clr', 'Clr:', value = 0, min = 0, max = 100),
+                                                numericInput('Dist', 'Dist:', value = 0, min = 0, max = 100),
+                                                numericInput('TklW', 'TklW:', value = 0, min = 0,  max = 100)
+                               ))
+                      ),
+                      br(),
+                      fluidRow(
+                        column(12, 
+                               div(id = 'container', p('Average Expected Goals per Match prediction for the selected team:'), verbatimTextOutput('XG')),
+                               br(),
+                               div(id = 'container', p('Updated Expected Goals per Match prediction for the selected team:'), verbatimTextOutput('UpdatedXG')),
+                               br(),
+                               div(id = 'container', p('Difference in Expected Goals per Match prediction (Updated XG - Average XG):'), verbatimTextOutput('DiffXG'))
+                      )
+                      
+))))
 
 # Define server logic ----
-server <- function(input, output) {
+server <- function(input, output, session) {
   
-  selectedTeam <- reactive({
-    
-    data.frame(Variable = c('Team',
-                            'SoT',
-                            'Opp_Saves',
-                            'PKatt',
-                            'SCA',
-                            'Short_Cmp',
-                            'TB',
-                            'Dead',
-                            'Clr',
-                            'Dist',
-                            'TklW'),
-               Value = c(PL_10 %>% filter(Team == input$Team) %>% pull(Team),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(SoT), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(PKatt), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(TB), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Dead), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Clr), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(Dist), digits = 2),
-                         round(PL_10 %>% filter(Team == input$Team) %>% pull(TklW), digits = 2)))
-      
-  })
-  
-  selectedValues <- reactive({
-    
-    data.frame(Team = PL_10 %>% filter(Team == input$Team) %>% pull(Team),
-               SoT = ifelse(input$SoT != PL_10 %>% filter(Team == input$Team) %>% pull(SoT), input$SoT, PL_10 %>% filter(Team == input$Team) %>% pull(SoT)),
-               Opp_Saves = ifelse(input$Opp_Saves != PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves), input$Opp_Saves, PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves)),
-               PKatt = ifelse(input$PKatt != PL_10 %>% filter(Team == input$Team) %>% pull(PKatt), input$PKatt, PL_10 %>% filter(Team == input$Team) %>% pull(PKatt)),
-               SCA_Total = ifelse(input$SCA_Total != PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total), input$SCA_Total, PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total)),
-               Short_Cmp = ifelse(input$Short_Cmp != PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp), input$Short_Cmp, PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp)),
-               TB = ifelse(input$TB != PL_10 %>% filter(Team == input$Team) %>% pull(TB), input$TB, PL_10 %>% filter(Team == input$Team) %>% pull(TB)),
-               Dead = ifelse(input$Dead != PL_10 %>% filter(Team == input$Team) %>% pull(Dead), input$Dead, PL_10 %>% filter(Team == input$Team) %>% pull(Dead)),
-               Clr = ifelse(input$Clr != PL_10 %>% filter(Team == input$Team) %>% pull(Clr), input$Clr, PL_10 %>% filter(Team == input$Team) %>% pull(Clr)),
-               Dist = ifelse(input$Dist != PL_10 %>% filter(Team == input$Team) %>% pull(Dist), input$Dist, PL_10 %>% filter(Team == input$Team) %>% pull(Dist)),
-               TklW = ifelse(input$TklW != PL_10 %>% filter(Team == input$Team) %>% pull(TklW), input$TklW, PL_10 %>% filter(Team == input$Team) %>% pull(TklW)))
-    
-  })
-  
-  # Show the average values for the selected team in an HTML table ----
-  output$TeamAvg <- renderTable({
-      selectedTeam()
+  observeEvent(input$Team, {
+    updateNumericInput(session, 'SoT', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(SoT), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Opp_Saves', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'PKatt', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(PKatt), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'SCA_Total', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Short_Cmp', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp), digits = 2), min = 0, max = 1000)
+    updateNumericInput(session, 'TB', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(TB), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Dead', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Dead), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Clr', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Clr), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Dist', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Dist), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'TklW', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(TklW), digits = 2), min = 0, max = 100)
   })
   
   output$XG <- renderText({
     round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)
+  })
+  
+  selectedValues <- eventReactive(input$updateButton, {
+    
+    data.frame(Team = input$Team, # PL_10 %>% filter(Team == input$Team) %>% pull(Team),
+               SoT = input$SoT, # ifelse(input$SoT != PL_10 %>% filter(Team == input$Team) %>% pull(SoT), input$SoT, PL_10 %>% filter(Team == input$Team) %>% pull(SoT)),
+               Opp_Saves = input$Opp_Saves, # ifelse(input$Opp_Saves != PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves), input$Opp_Saves, PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves)),
+               PKatt = input$PKatt, #ifelse(input$PKatt != PL_10 %>% filter(Team == input$Team) %>% pull(PKatt), input$PKatt, PL_10 %>% filter(Team == input$Team) %>% pull(PKatt)),
+               SCA_Total = input$SCA_Total, #ifelse(input$SCA_Total != PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total), input$SCA_Total, PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total)),
+               Short_Cmp = input$Short_Cmp, #ifelse(input$Short_Cmp != PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp), input$Short_Cmp, PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp)),
+               TB = input$TB, #ifelse(input$TB != PL_10 %>% filter(Team == input$Team) %>% pull(TB), input$TB, PL_10 %>% filter(Team == input$Team) %>% pull(TB)),
+               Dead = input$Dead, #ifelse(input$Dead != PL_10 %>% filter(Team == input$Team) %>% pull(Dead), input$Dead, PL_10 %>% filter(Team == input$Team) %>% pull(Dead)),
+               Clr = input$Clr, #ifelse(input$Clr != PL_10 %>% filter(Team == input$Team) %>% pull(Clr), input$Clr, PL_10 %>% filter(Team == input$Team) %>% pull(Clr)),
+               Dist = input$Dist, #ifelse(input$Dist != PL_10 %>% filter(Team == input$Team) %>% pull(Dist), input$Dist, PL_10 %>% filter(Team == input$Team) %>% pull(Dist)),
+               TklW = input$TklW) #ifelse(input$TklW != PL_10 %>% filter(Team == input$Team) %>% pull(TklW), input$TklW, PL_10 %>% filter(Team == input$Team) %>% pull(TklW)))
+    
   })
   
   output$UpdatedXG <- renderText({
