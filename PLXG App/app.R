@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyWidgets)
 
 PL_10 <- read.csv('PL_10.csv')
 PLXG.Model <- readRDS('PLXGModel.RData')
@@ -29,7 +30,7 @@ ui <- fluidPage(
                       p('This dataset was then used to build various models in an effort to predict the number of goals that would be scored by a particular team in any given match.'),
                       p('Models were trained to minimize the Root Mean Square Error', strong('RMSE'), 'which is:'),
                       withMathJax(),
-                      helpText('$$\\mathrm{RMSE}=\\sqrt{\\frac{\\sum_{i=1}^{N}\\left(\\mathrm{Actual}_{i} - \\mathrm{Predicted}_{i}\\right)^{2}}N}$$'),
+                      p('$$\\mathrm{RMSE}=\\sqrt{\\frac{\\sum_{i=1}^{N}\\left(\\mathrm{Actual}_{i} - \\mathrm{Predicted}_{i}\\right)^{2}}N}$$'),
                       p('The best model and the one used in this app is an eXtreme Gradient Boosted ', strong('XGB'), 'model. This model had RMSE values of approximately .3'),
                       p('The specifics of the XGB model along with the other models created are in this ', a('R script', href = 'https://github.com/mrmorgan17/PLXG/blob/main/PLXG_modeling.R'), 'on my GitHub profile'),
                       p('The best XGB model was built using these 10 variables:'), 
@@ -52,7 +53,7 @@ ui <- fluidPage(
                           style = 'text-align: right;')),
              tabPanel('Example',
                       titlePanel('Premier League Expected Goals (PLXG)'),
-                      p('This is a walkthrough of how to update expected goals using data from a specific match.'),
+                      p('This is a walkthrough of how to get an expected goals prediction for a specific Premier League match.'),
                       p('For this example, we will look at Manchester City in their match against Chelsea on January 3rd 2021'),
                       p('To get to specific match pages on FBref from the ', a('homepage', href = 'https://fbref.com/en')),
                       div(p('Go to the ', strong('Competitions'), 'tab and select ', strong('English Premier League.')),
@@ -97,46 +98,58 @@ ui <- fluidPage(
                       div(p(strong('TklW'), '= 8'),
                           style = 'padding-left: 2em;'),
                       br(), 
-                      p('Now, the values can be entered in the', strong('Calculate'), 'tab to get an updated XG value'),
-                      p('For this match against Chelsea, Manchester City had an updated XG value of 2.91'),
+                      p('Now, the values can be entered in the', strong('Calculate'), 'tab to get an updated XG prediction'),
+                      p('For this match against Chelsea, Manchester City had an updated XG value of 2.95'),
                       p('For this match against Chelsea, Manchester City actually scored 3 goals')),
              tabPanel('Calculate',
                       # App title ----
                       titlePanel('Premier League Expected Goals (PLXG)'),
-                      
+                      br(),
                       fluidRow(
                         column(4,
+                               p('Select a Premier League Team to get started'),
                                selectInput('Team', 'Team:', 
-                                           choices = unique(PL_10$Team),
+                                           choices = c('', unique(PL_10$Team)),
                                            selected = ''),
-                               br(),
-                               actionButton('updateButton', 'Update XG'),
-                               p('Click the button to update the selected teams XG values according to what has been entered by the user.')),
+                               p('The 10 variables that appear are the ones used by the model to predict XG for a team'),
+                               p('Initially shown are the average values of the 10 variables for the selected team'),
+                               p('An average XG prediction is also calculated'),
+                               p('The user may enter their own inputs for each variable to calculate an updated XG prediction for the team')),
                         column(2,
                                conditionalPanel(condition = "input.Team != ''",
-                                                numericInput('SoT', 'SoT:', value = 0, min = 0, max = 100),
-                                                numericInput('Opp_Saves', 'Opp_Saves:',  value = 0, min = 0, max = 100),
-                                                numericInput('PKatt', 'PKatt:', value = 0, min = 0, max = 100),
-                                                numericInput('SCA_Total', 'SCA:', value = 0, min = 0, max = 100),
-                                                numericInput('Short_Cmp', 'Short_Cmp:', value = 0, min = 0, max = 1000)
+                                                numericInput('SoT', 'SoT:', value = 0, min = 0, max = 100, step = .01),
+                                                numericInput('Opp_Saves', 'Opp_Saves:',  value = 0, min = 0, max = 100, step = .01),
+                                                numericInput('PKatt', 'PKatt:', value = 0, min = 0, max = 100, step = .01),
+                                                numericInput('SCA_Total', 'SCA:', value = 0, min = 0, max = 100, step = .01),
+                                                numericInput('Short_Cmp', 'Short_Cmp:', value = 0, min = 0, max = 1000, step = .01)
                                )),
                         column(2,
                                conditionalPanel(condition = "input.Team != ''",
-                                                numericInput('TB', 'TB:', value = 0, min = 0, max = 100),
-                                                numericInput('Dead', 'Dead:', value = 0, min = 0, max = 100),
-                                                numericInput('Clr', 'Clr:', value = 0, min = 0, max = 100),
-                                                numericInput('Dist', 'Dist:', value = 0, min = 0, max = 100),
-                                                numericInput('TklW', 'TklW:', value = 0, min = 0,  max = 100)
-                               ))
+                                                numericInput('TB', 'TB:', value = 0, min = 0, max = 100, step = .01),
+                                                numericInput('Dead', 'Dead:', value = 0, min = 0, max = 100, step = .01),
+                                                numericInput('Clr', 'Clr:', value = 0, min = 0, max = 100, step = .01),
+                                                numericInput('Dist', 'Dist:', value = 0, min = 0, max = 100, step = .01),
+                                                numericInput('TklW', 'TklW:', value = 0, min = 0,  max = 100, step = .01)
+                               )),
+                        column(4,
+                               align = 'center',
+                               p('Click the button to update the team\'s XG prediction'),
+                               actionBttn(inputId = 'updateButton', label = 'Update XG', color = 'primary', style = 'gradient'),
+                               br(),
+                               br(),
+                               p('Click the button to reset the variables of the selected team back to their initial average values'),
+                               actionBttn(inputId = 'resetButton', label = 'Reset', color = 'primary', style = 'gradient'))
                       ),
                       br(),
                       fluidRow(
                         column(12, 
-                               div(id = 'container', p('Average Expected Goals per Match prediction for the selected team:'), verbatimTextOutput('XG')),
+                               align = 'center',
                                br(),
-                               div(id = 'container', p('Updated Expected Goals per Match prediction for the selected team:'), verbatimTextOutput('UpdatedXG')),
+                               div(id = 'container', p('Average Expected Goals prediction for the selected team:'), verbatimTextOutput('XG')),
                                br(),
-                               div(id = 'container', p('Difference in Expected Goals per Match prediction (Updated XG - Average XG):'), verbatimTextOutput('DiffXG'))
+                               div(id = 'container', p('Updated Expected Goals prediction for the selected team:'), verbatimTextOutput('UpdatedXG')),
+                               br(),
+                               div(id = 'container', p('Difference in Expected Goals predictions (Updated XG - Average XG):'), verbatimTextOutput('DiffXG'))
                       )
                       
 ))))
@@ -158,23 +171,23 @@ server <- function(input, output, session) {
   })
   
   output$XG <- renderText({
-    round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)
+    ifelse(class(try(round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
+           'No Team Selected', 
+           round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2))
   })
   
   selectedValues <- eventReactive(input$updateButton, {
-    
-    data.frame(Team = input$Team, # PL_10 %>% filter(Team == input$Team) %>% pull(Team),
-               SoT = input$SoT, # ifelse(input$SoT != PL_10 %>% filter(Team == input$Team) %>% pull(SoT), input$SoT, PL_10 %>% filter(Team == input$Team) %>% pull(SoT)),
-               Opp_Saves = input$Opp_Saves, # ifelse(input$Opp_Saves != PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves), input$Opp_Saves, PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves)),
-               PKatt = input$PKatt, #ifelse(input$PKatt != PL_10 %>% filter(Team == input$Team) %>% pull(PKatt), input$PKatt, PL_10 %>% filter(Team == input$Team) %>% pull(PKatt)),
-               SCA_Total = input$SCA_Total, #ifelse(input$SCA_Total != PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total), input$SCA_Total, PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total)),
-               Short_Cmp = input$Short_Cmp, #ifelse(input$Short_Cmp != PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp), input$Short_Cmp, PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp)),
-               TB = input$TB, #ifelse(input$TB != PL_10 %>% filter(Team == input$Team) %>% pull(TB), input$TB, PL_10 %>% filter(Team == input$Team) %>% pull(TB)),
-               Dead = input$Dead, #ifelse(input$Dead != PL_10 %>% filter(Team == input$Team) %>% pull(Dead), input$Dead, PL_10 %>% filter(Team == input$Team) %>% pull(Dead)),
-               Clr = input$Clr, #ifelse(input$Clr != PL_10 %>% filter(Team == input$Team) %>% pull(Clr), input$Clr, PL_10 %>% filter(Team == input$Team) %>% pull(Clr)),
-               Dist = input$Dist, #ifelse(input$Dist != PL_10 %>% filter(Team == input$Team) %>% pull(Dist), input$Dist, PL_10 %>% filter(Team == input$Team) %>% pull(Dist)),
-               TklW = input$TklW) #ifelse(input$TklW != PL_10 %>% filter(Team == input$Team) %>% pull(TklW), input$TklW, PL_10 %>% filter(Team == input$Team) %>% pull(TklW)))
-    
+    data.frame(Team = input$Team, 
+               SoT = input$SoT, 
+               Opp_Saves = input$Opp_Saves, 
+               PKatt = input$PKatt, 
+               SCA_Total = input$SCA_Total, 
+               Short_Cmp = input$Short_Cmp, 
+               TB = input$TB, 
+               Dead = input$Dead, 
+               Clr = input$Clr, 
+               Dist = input$Dist, 
+               TklW = input$TklW) 
   })
   
   output$UpdatedXG <- renderText({
@@ -183,6 +196,19 @@ server <- function(input, output, session) {
   
   output$DiffXG <- renderText({
     round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)
+  })
+  
+  observeEvent(input$resetButton, {
+    updateNumericInput(session, 'SoT', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(SoT), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Opp_Saves', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'PKatt', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(PKatt), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'SCA_Total', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Short_Cmp', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp), digits = 2), min = 0, max = 1000)
+    updateNumericInput(session, 'TB', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(TB), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Dead', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Dead), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Clr', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Clr), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Dist', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Dist), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'TklW', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(TklW), digits = 2), min = 0, max = 100)
   })
   
 }
