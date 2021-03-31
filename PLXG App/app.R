@@ -28,15 +28,15 @@ ui <- fluidPage(
                       p('The dataset created from the web scraping is available ', a('here', href = 'https://github.com/mrmorgan17/PLXG/blob/main/Pl_team_match_data.csv'), 'on my GitHub profile as a .csv file'),
                       br(),
                       p('This dataset was then used to build various models in an effort to predict the number of goals that would be scored by a particular team in any given match.'),
-                      p('Models were trained to minimize the Root Mean Square Error', strong('RMSE'), 'which is:'),
+                      p('Models were trained to minimize the Root Mean Square Error', strong('RMSE'), 'which in this case is:'),
                       withMathJax(),
-                      p('$$\\mathrm{RMSE}=\\sqrt{\\frac{\\sum_{i=1}^{N}\\left(\\mathrm{Actual}_{i} - \\mathrm{Predicted}_{i}\\right)^{2}}N}$$'),
+                      p('$$\\mathrm{RMSE}=\\sqrt{\\frac{\\sum_{i=1}^{N}\\left(\\mathrm{Actual\\,Goals}_{i} - \\mathrm{Predicted\\,Goals}_{i}\\right)^{2}}N}$$'),
                       p('The best model and the one used in this app is an eXtreme Gradient Boosted ', strong('XGB'), 'model. This model had RMSE values of approximately .3'),
                       p('The specifics of the XGB model along with the other models created are in this ', a('R script', href = 'https://github.com/mrmorgan17/PLXG/blob/main/PLXG_modeling.R'), 'on my GitHub profile'),
                       p('The best XGB model was built using these 10 variables:'), 
                       div(p(strong('SoT:'), 'Shots on target'),
                           p(strong('Opp_Saves:'), 'Opposing goalkeeper saves'),
-                          p(strong('PKatt:'), 'Penalty Kicks attempted'),
+                          p(strong('PKatt:'), 'Penalty kicks attempted'),
                           p(strong('SCA:'), 'The two offensive actions directly leading to a shot, such as passes, dribbles and drawing fouls.'),
                           p(strong('Short_Cmp:'), 'Passes completed between 5 and 15 yards'),
                           p(strong('TB:'), 'Completed passes sent between back defenders into open space'),
@@ -134,11 +134,11 @@ ui <- fluidPage(
                         column(4,
                                align = 'center',
                                p('Click the button to update the team\'s XG prediction'),
-                               actionBttn(inputId = 'updateButton', label = 'Update XG', color = 'primary', style = 'gradient'),
+                               actionBttn(inputId = 'updateButton', label = 'Update XG', color = 'primary', style = 'fill'),
                                br(),
                                br(),
                                p('Click the button to reset the variables of the selected team back to their initial average values'),
-                               actionBttn(inputId = 'resetButton', label = 'Reset', color = 'primary', style = 'gradient'))
+                               actionBttn(inputId = 'resetButton', label = 'Reset', color = 'primary', style = 'fill'))
                       ),
                       br(),
                       fluidRow(
@@ -191,11 +191,15 @@ server <- function(input, output, session) {
   })
   
   output$UpdatedXG <- renderText({
-    round(predict(PLXG.Model, selectedValues()), digits = 2)
+    ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2), silent = TRUE)) == 'try-error', 
+           'No Team Selected', 
+           round(predict(PLXG.Model, selectedValues()), digits = 2))
   })
   
   output$DiffXG <- renderText({
-    round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)
+    ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
+           'No Team Selected', 
+           round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2))
   })
   
   observeEvent(input$resetButton, {
