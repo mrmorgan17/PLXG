@@ -9,7 +9,32 @@ PLXG.Model <- readRDS('PLXGModel.RData')
 
 # Define UI
 ui <- dashboardPage(
-  dashboardHeader(title = 'PLXG'),
+  dashboardHeader(
+    title = 'PLXG',
+    dropdownMenu(type = 'messages',
+                 headerText = 'About this app',
+                 icon = icon('address-card'),
+                 messageItem(
+                   from = 'Author',
+                   message = helpText('Matthew Morgan'),
+                   time = '4/1/2021',
+                   href = 'https://github.com/mrmorgan17'
+                 ),
+                 messageItem(
+                   from = 'Data Source',
+                   message = helpText('FBref.com'),
+                   icon = icon('database'),
+                   href = 'https://fbref.com/en'
+                 ),
+                 messageItem(
+                   from = 'R Packages',
+                   message = div(helpText('caret, caTools, ggplot2, rvest,'),
+                                 helpText('shiny, shinydashboard, shinyWidgets,'),
+                                 helpText('tidyverse, vroom')), 
+                   icon = icon('box-open')
+                 )
+    )
+  ),
   dashboardSidebar(
     sidebarMenu(
       menuItem('About', tabName = 'about', icon = icon('info')),
@@ -46,26 +71,21 @@ ui <- dashboardPage(
               p('The specifics of the XGB model along with the other models created are in this ', a('R script', href = 'https://github.com/mrmorgan17/PLXG/blob/main/PLXG_modeling.R'), 'on my GitHub profile'),
               p('The best XGB model was built using these 10 variables:'),
               div(p(strong('SoT:'), 'Shots on target'),
-                  p(strong('Opp_Saves:'), 'Opposing goalkeeper saves'),
+                  p(strong('Opp_Saves:'), em('Opposing'), 'goalkeeper saves'),
                   p(strong('PKatt:'), 'Penalty kicks attempted'),
                   p(strong('SCA:'), 'The two offensive actions directly leading to a shot, such as passes, dribbles and drawing fouls.'),
                   p(strong('Short_Cmp:'), 'Passes completed between 5 and 15 yards'),
                   p(strong('TB:'), 'Completed passes sent between back defenders into open space'),
                   p(strong('Dead:'), 'Dead-ball passes (Includes free kicks, corner kicks, kick offs, throw-ins and goal kicks)'),
-                  p(strong('Clr:'), 'Opposing team clearances'),
+                  p(strong('Clr:'), em('Opposing'), 'team clearances'),
                   p(strong('Dist:'), 'Average distance, in yards, from goal of all shots taken (Does not include penalty kicks)'),
-                  p(strong('TklW:'), 'Tackles in which the opposing team won possession of the ball'),
+                  p(strong('TklW:'), 'Tackles in which the', em('opposing'), 'team won possession of the ball'),
                   style = 'padding-left: 2em;'),
               p('These 10 variables were the 10 most important variables identified from an XGB model where all variables were used to build it.'),
-              br(),
-              div(p(strong('Built by'), a('Matthew Morgan', href = 'https://github.com/mrmorgan17'), 'using RStudio and Shiny'),
-                  p(strong('R Packages:'), 'caret, caTools, ggplot2, rvest, shiny, shinydashboard, shinyWidgets, tidyverse, vroom'),
-                  p(strong('Sources:'), a('FBref.com', href = 'https://fbref.com/en'), 'for data'),
-                  style = 'text-align: right;')
       ),
       tabItem(tabName = 'example',
               titlePanel('Premier League Expected Goals (PLXG)'),
-              p('This is a walkthrough of how to get an expected goals prediction for a specific Premier League match.'),
+              p(em('This is a walkthrough of how to get an expected goals prediction for a specific Premier League match.')),
               p('For this example, we will look at Manchester City in their match against Chelsea on January 3rd 2021'),
               p('To get to specific match pages on FBref from the ', a('homepage', href = 'https://fbref.com/en')),
               div(p('Go to the ', strong('Competitions'), 'tab and select ', strong('English Premier League.')),
@@ -172,7 +192,6 @@ ui <- dashboardPage(
                   ),
                   column(4,
                          align = 'center',     
-                         p('Difference in Expected Goals'),
                          p(em('Updated XG - Average XG'))
                   )
                 )
@@ -296,7 +315,7 @@ server <- function(input, output, session) {
       'XG Difference', 
       ifelse(class(try(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error',
              0,
-             round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)),
+             round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())) - predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)),
       icon = icon('futbol'),
       color = if (class(try(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error') {
         'black'
