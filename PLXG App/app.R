@@ -12,8 +12,9 @@ ui <- dashboardPage(
   dashboardHeader(
     title = 'PLXG',
     dropdownMenu(type = 'messages',
-                 headerText = 'About this Shiny application:',
+                 badgeStatus = NULL,
                  icon = icon('address-card'),
+                 headerText = 'About this Shiny application:',
                  messageItem(
                    from = 'Author',
                    message = helpText('Matthew Morgan'),
