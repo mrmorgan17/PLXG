@@ -92,87 +92,88 @@ ui <- dashboardPage(
                 box(
                   title = 'Getting specific match data from FBref',
                   width = 8,
+                  collapsible = TRUE,
                   p('Starting from the', a('homepage', href = 'https://fbref.com/en')),
                   div(p('Go to the ', strong('Competitions'), 'tab and select ', strong('English Premier League.')),
                       p('Then, select a team from the ', strong('League Table')),
                       p('From there, select the ', strong('Match Logs'), 'tab and then select the ', strong('Scores & Fixtures'), 'link for the', strong('Premier League')),
                       p('Finally, select the date of the match you are interested in'),
                       style = 'padding-left: 2em;'),
-                  p(a('Here', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'is the FBref page for that match')
+                  p('This is the', a('link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the specific FBref match page')
                 ),
               ),
-              h3('Getting Variable Values'),
-              p('For this example, we will look at Manchester City in their match against Chelsea on January 3rd 2021'),
+              p(em('For this example, we will look at Manchester City in their match against Chelsea on January 3rd 2021')),
               fluidRow(
                 tabBox(
                   width = 12,
                   # selected = "Tab3",
                   tabPanel(
                     'Team',
-                    p('First, we need ', strong('Team'), 'which we can get from the drop-down menu for Team in the ', strong('Calculate'), 'tab of this app'),
-                    div(p(strong('Team'), '= Manchester-City'),
-                        style = 'padding-left: 2em;')
+                    p(strong('Team'), 'is selected in the drop-down menu for Team in the', strong('Calculate'), 'tab of this app'),
+                    div(p(em('Team = Manchester-City')),
+                        style = 'padding-left: 2em;'),
+                    p(strong('Note:'), em('All other values are on the FBref match page'))
                   ),
                   tabPanel(
                     'SoT',
-                    p('Next, we need ', strong('SoT'), 'which we can get from looking at the last row of the ', strong('SoT'), 'column in the', strong('Summary'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-                    div(p(strong('SoT'), '= 6'),
+                    p('To get', strong('SoT'), 'look at the last row of the', strong('SoT'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+                    div(p(em('SoT = 6')),
                         style = 'padding-left: 2em;')
                   ),
                   tabPanel(
                     'Opp_Saves',
-                    p('Next, we need ', strong('Opp_Saves'), 'which we can get from looking at the ', strong('Saves'), 'column in the', strong('Chelsea Goalkeeper Stats'), 'table'),
-                    div(p(strong('Opp_Saves'), '= 3'),
+                    p('To get', strong('Opp_Saves'), 'look at the', strong('Saves'), 'column in the', strong('Chelsea Goalkeeper Stats'), 'table'),
+                    div(p(em('Opp_Saves = 3')),
                         style = 'padding-left: 2em;')
                   ),
                   tabPanel(
                     'PKatt',
-                    p('Next, we need ', strong('PKatt'), 'which we can get from looking at the last row of the ', strong('PKatt'), 'column in the', strong('Summary'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-                    div(p(strong('PKatt'), '= 0'),
+                    p('To get', strong('PKatt'), 'look at the last row of the', strong('PKatt'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+                    div(p(em('PKatt= 0')),
                         style = 'padding-left: 2em;')
                   ),
                   tabPanel(
                     'SCA',
-                    p('Next, we need ', strong('SCA'), 'which we can get from looking at the last row of the ', strong('SCA'), 'column in the', strong('Summary'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-                    div(p(strong('SCA'), '= 32'),
+                    p('To get', strong('SCA'), 'look at the last row of the', strong('SCA'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+                    div(p(em('SCA = 32')),
                         style = 'padding-left: 2em;')
                   ),
                   tabPanel(
                     'Short_Cmp',
-                    p('Next, we need ', strong('Short_Cmp'), 'which we can get from looking at the last row of the ', strong('Cmp'), 'column in the', strong('Short'), 'section of the', strong('Passing'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-                    div(p(strong('Short_Cmp'), '= 256'),
+                    p('To get', strong('Short_Cmp'), 'look at the last row of the', strong('Cmp'), 'column in the', strong('Short'), 'section of the', strong('Passing'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
+                    div(p(em('Short_Cmp = 256')),
                         style = 'padding-left: 2em;')
                   ),
                   tabPanel(
                     'TB',
-                    p('Next, we need ', strong('TB'), 'which we can get from looking at the last row of the ', strong('TB'), 'column in the', strong('Pass Types'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-                    div(p(strong('TB'), '= 1'),
+                    p('To get', strong('TB'), 'look at the last row of the', strong('TB'), 'column in the', strong('Pass Types'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+                    div(p(em('TB = 1')),
                         style = 'padding-left: 2em;')
                   ),
                   tabPanel(
                     'Dead',
-                    p('Next, we need ', strong('Dead'), 'which we can get from looking at the last row of the ', strong('Dead'), 'column in the', strong('Pass Types'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-                    div(p(strong('Dead'), '= 43'),
+                    p('To get', strong('Dead'), 'look at the last row of the', strong('Dead'), 'column in the', strong('Pass Types'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+                    div(p(em('Dead = 43')),
                         style = 'padding-left: 2em;')
                   ),
                   tabPanel(
                     'Clr',
-                    p('Next, we need ', strong('Clr'), 'which we can get from looking at the last row of the ', strong('Clr'), 'column in the', strong('Defensive Actions'), 'tab of the ', strong('Chelsea Player Stats'), 'table'),
-                    div(p(strong('Clr'), '= 7'),
+                    p('To get', strong('Clr'), 'look at the last row of the', strong('Clr'), 'column in the', strong('Defensive Actions'), 'tab of the', strong('Chelsea Player Stats'), 'table'),
+                    div(p(em('Clr = 7')),
                         style = 'padding-left: 2em;')
                   ),
                   tabPanel(
                     'Dist',
-                    p('Next, we need ', strong('Dist'), 'which we can get from looking at the ', strong('Dist'), 'column for the row of the date of the selected match in the', strong('Shooting'), 'tab of the ', strong('Manchester City Match Logs'), 'table'),
-                    div(p(strong('Dist'), '= 14.6'),
+                    p('To get', strong('Dist'), 'look at the ', strong('Dist'), 'column for the row of the date of the selected match in the', strong('Shooting'), 'tab of the', strong('Manchester City Match Logs'), 'table'),
+                    div(p(em('Dist = 14.6')),
                         style = 'padding-left: 2em;'),
-                    p(em('This table is NOT on the match page, it is found after you select the Match Logs tab for a specific team')), 
+                    p(strong('Note:'), em('This table is NOT on the match page, it is on the'), strong('Match Logs'), em('tab for a specific team on FBref')), 
                     p(a('Here', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'is the link to that table for Machester City'),
                   ),
                   tabPanel(
                     'TklW',
-                    p('Finally, we need ', strong('TklW'), 'which we can get from looking at the last row of the ', strong('TklW'), 'column in the', strong('Defensive Actions'), 'tab of the ', strong('Chelsea Player Stats'), 'table'),
-                    div(p(strong('TklW'), '= 8'),
+                    p('To get', strong('TklW'), 'look at the last row of the', strong('TklW'), 'column in the', strong('Defensive Actions'), 'tab of the', strong('Chelsea Player Stats'), 'table'),
+                    div(p(em('TklW = 8')),
                         style = 'padding-left: 2em;')
                   )
                 )
@@ -182,6 +183,7 @@ ui <- dashboardPage(
                 box(
                   title = 'Predicting XG',
                   width = 8,
+                  collapsible = TRUE,
                   p('Now, the values can be selected in the', strong('Calculate'), 'tab to get an updated XG prediction'),
                   p('For this match against Chelsea:'),
                   div(p('Manchester City had an XG prediction of 2.95 goals'),
@@ -193,38 +195,47 @@ ui <- dashboardPage(
       tabItem(tabName = 'calculate',
               titlePanel('Premier League Expected Goals (PLXG)'),
               fluidRow(
-                column(4,
-                       selectInput('Team', 'Team:',
-                                   choices = c('', unique(PL_10$Team)),
-                                   selected = ''),
-                       p('The 10 variables that appear are the ones used by the model to predict XG for a team'),
-                       p('Initially shown are the average values of the 10 variables for the selected team'),
-                       p('An average XG prediction is also calculated'),
-                       p('The user may enter their own inputs for each variable to calculate an updated XG prediction for the team')),
-                column(2,
-                       conditionalPanel(condition = "input.Team != ''",
-                                        numericInput('SoT', 'SoT:', value = 0, min = 0, max = 100, step = .01),
-                                        numericInput('Opp_Saves', 'Opp_Saves:',  value = 0, min = 0, max = 100, step = .01),
-                                        numericInput('PKatt', 'PKatt:', value = 0, min = 0, max = 100, step = .01),
-                                        numericInput('SCA_Total', 'SCA:', value = 0, min = 0, max = 100, step = .01),
-                                        numericInput('Short_Cmp', 'Short_Cmp:', value = 0, min = 0, max = 1000, step = .01)
-                                        )),
-                column(2,
-                       conditionalPanel(condition = "input.Team != ''",
-                                        numericInput('TB', 'TB:', value = 0, min = 0, max = 100, step = .01),
-                                        numericInput('Dead', 'Dead:', value = 0, min = 0, max = 100, step = .01),
-                                        numericInput('Clr', 'Clr:', value = 0, min = 0, max = 100, step = .01),
-                                        numericInput('Dist', 'Dist:', value = 0, min = 0, max = 100, step = .01),
-                                        numericInput('TklW', 'TklW:', value = 0, min = 0,  max = 100, step = .01)
-                                        )),
-                column(4,
-                       align = 'center',
-                       p('Click the button to update the team\'s XG prediction'),
-                       actionBttn(inputId = 'updateButton', label = 'Update XG', color = 'default', style = 'fill'),
-                       br(),
-                       br(),
-                       p('Click the button to reset the variables of the selected team back to their initial average values'),
-                       actionBttn(inputId = 'resetButton', label = 'Reset', color = 'default', style = 'fill'))
+                box(
+                  width = 4,
+                  selectInput('Team', 'Team:',
+                              choices = c('', unique(PL_10$Team)),
+                              selected = ''),
+                  p('The 10 variables that appear are the ones used by the model to predict XG for a team'),
+                  p('Initially shown are the average values of the 10 variables for the selected team'),
+                  p('An average XG prediction is also calculated'),
+                  p('The user may enter their own inputs for each variable to calculate an updated XG prediction for the team')
+                ),
+                box(
+                  width = 2,
+                  conditionalPanel(
+                    condition = "input.Team != ''",
+                    numericInput('SoT', 'SoT:', value = 0, min = 0, max = 100, step = .01),
+                    numericInput('Opp_Saves', 'Opp_Saves:',  value = 0, min = 0, max = 100, step = .01),
+                    numericInput('PKatt', 'PKatt:', value = 0, min = 0, max = 100, step = .01),
+                    numericInput('SCA_Total', 'SCA:', value = 0, min = 0, max = 100, step = .01),
+                    numericInput('Short_Cmp', 'Short_Cmp:', value = 0, min = 0, max = 1000, step = .01)
+                  )
+                ),
+                box(
+                  width = 2,
+                  conditionalPanel(
+                    condition = "input.Team != ''",
+                    numericInput('TB', 'TB:', value = 0, min = 0, max = 100, step = .01),
+                    numericInput('Dead', 'Dead:', value = 0, min = 0, max = 100, step = .01),
+                    numericInput('Clr', 'Clr:', value = 0, min = 0, max = 100, step = .01),
+                    numericInput('Dist', 'Dist:', value = 0, min = 0, max = 100, step = .01),
+                    numericInput('TklW', 'TklW:', value = 0, min = 0,  max = 100, step = .01)
+                  )
+                ),
+                box(
+                  width = 4,
+                  align = 'center',
+                  p('Click the button to update the team\'s XG prediction'),
+                  actionBttn(inputId = 'updateButton', label = 'Update XG', color = 'default', style = 'fill'),
+                  br(),
+                  br(),
+                  p('Click the button to reset the variables of the selected team back to their initial average values'),
+                  actionBttn(inputId = 'resetButton', label = 'Reset', color = 'default', style = 'fill'))
                 ),
               br(),
               fluidRow(
@@ -238,17 +249,20 @@ ui <- dashboardPage(
               fluidRow(
                 conditionalPanel(
                   condition = "input.Team != ''",
-                  column(4,
-                         align = 'center',     
-                         p('Average Expected Goals prediction for the selected team')
+                  box(
+                    width = 4,
+                    align = 'center', 
+                    p('Average Expected Goals prediction for the selected team')
                   ),
-                  column(4,
-                         align = 'center',     
-                         p('Updated Expected Goals prediction for the selected team')
+                  box(
+                    width = 4,
+                    align = 'center', 
+                    p('Updated Expected Goals prediction for the selected team')
                   ),
-                  column(4,
-                         align = 'center',     
-                         p(em('Updated XG - Average XG'))
+                  box(
+                    width = 4,
+                    align = 'center',
+                    p(em('Updated XG - Average XG'))
                   )
                 )
               )
@@ -256,15 +270,17 @@ ui <- dashboardPage(
       tabItem(tabName = 'visualization',
               titlePanel('Premier League Expected Goals (PLXG)'),
               fluidRow(
-                column(3,
-                       selectInput('PlotTeam', 'Team:',
-                                   choices = c('', unique(sort(Full_PL_10$Team)))),
-                       br(),
-                       selectInput('Variable', 'Variable:',
-                                   choices = c('', 'Goals', 'SoT', 'Opp_Saves', 'PKatt', 'SCA_Total', 'Short_Cmp', 'TB', 'Dead', 'Clr', 'Dist', 'TklW')),
-                       br(),
-                       sliderInput('nBins', 'Number of Bins', value = 10, min = 0, max = 50, step = 5, ticks = FALSE),
-                       br()),
+                box(
+                  width = 3,
+                  selectInput('PlotTeam', 'Team:',
+                              choices = c('', unique(sort(Full_PL_10$Team)))),
+                  br(),
+                  selectInput('Variable', 'Variable:',
+                              choices = c('', 'Goals', 'SoT', 'Opp_Saves', 'PKatt', 'SCA_Total', 'Short_Cmp', 'TB', 'Dead', 'Clr', 'Dist', 'TklW')),
+                  br(),
+                  sliderInput('nBins', 'Number of Bins', value = 10, min = 0, max = 50, step = 5, ticks = FALSE),
+                  br()
+                ),
                 # actionBttn(inputId = 'plotButton', label = 'Plot', color = 'primary', style = 'fill')),
                 column(9,
                        plotOutput('dataPlot'))
@@ -281,28 +297,33 @@ ui <- dashboardPage(
               fluidRow(
                 conditionalPanel(
                   condition = "input.PlotTeam != '' & input.Variable != ''",
-                  column(4,
+                  box(
+                    width = 4,
                     align = 'center',
                     div(id = 'container', strong(textOutput('Variable')), p('average for'), strong(textOutput('PlotTeam')))
                   ),
-                  column(4,
+                  box(
+                    width = 4,
                     align = 'center',
                     div(id = 'container', strong(textOutput('VariableCopy')), p('average across all Premier League Teams'))
                   ),
-                  column(4,
+                  box(
+                    width = 4,
                     align = 'center',
                     p(em('Team Average - League Average'))
                   )
                 )
               ),
-              br(),
               fluidRow(
-                column(12,
-                  div(p('Plots are created with Premier League data from the following campaigns:'),
-                      p('2017-2018'),
+                box(
+                  title = 'Data Info',
+                  collapsible = TRUE,
+                  collapsed = TRUE,
+                  p('Plots are created with Premier League data from the following campaigns:'),
+                  div(p('2017-2018'),
                       p('2018-2019'),
                       p('2019-2020'),
-                      style = 'text-align: right;')
+                      style = 'text-align: left;')
                 )
               )
       )
