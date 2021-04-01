@@ -87,53 +87,108 @@ ui <- dashboardPage(
       tabItem(tabName = 'example',
               titlePanel('Premier League Expected Goals (PLXG)'),
               p(em('This is a walkthrough of how to get an expected goals prediction for a specific Premier League match.')),
+              fluidRow(
+                column(2),
+                box(
+                  title = 'Getting specific match data from FBref',
+                  width = 8,
+                  p('Starting from the', a('homepage', href = 'https://fbref.com/en')),
+                  div(p('Go to the ', strong('Competitions'), 'tab and select ', strong('English Premier League.')),
+                      p('Then, select a team from the ', strong('League Table')),
+                      p('From there, select the ', strong('Match Logs'), 'tab and then select the ', strong('Scores & Fixtures'), 'link for the', strong('Premier League')),
+                      p('Finally, select the date of the match you are interested in'),
+                      style = 'padding-left: 2em;'),
+                  p(a('Here', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'is the FBref page for that match')
+                ),
+              ),
+              h3('Getting Variable Values'),
               p('For this example, we will look at Manchester City in their match against Chelsea on January 3rd 2021'),
-              p('To get to specific match pages on FBref from the ', a('homepage', href = 'https://fbref.com/en')),
-              div(p('Go to the ', strong('Competitions'), 'tab and select ', strong('English Premier League.')),
-                  p('Then, select a team from the ', strong('League Table')),
-                  p('From there, select the ', strong('Match Logs'), 'tab and then select the ', strong('Scores & Fixtures'), 'link for the', strong('Premier League')),
-                  p('Finally, select the date of the match you are interested in'),
-                  style = 'padding-left: 2em;'),
-              p(a('Here', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'is the FBref page for that match'),
-              br(),
-              p('First, we need ', strong('Team'), 'which we can get from the drop-down menu for Team in the ', strong('Calculate'), 'tab of this app'),
-              div(p(strong('Team'), '= Manchester-City'),
-                  style = 'padding-left: 2em;'),
-              p('Next, we need ', strong('SoT'), 'which we can get from looking at the last row of the ', strong('SoT'), 'column in the', strong('Summary'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-              div(p(strong('SoT'), '= 6'),
-                  style = 'padding-left: 2em;'),
-              p('Next, we need ', strong('Opp_Saves'), 'which we can get from looking at the ', strong('Saves'), 'column in the', strong('Chelsea Goalkeeper Stats'), 'table'),
-              div(p(strong('Opp_Saves'), '= 3'),
-                  style = 'padding-left: 2em;'),
-              p('Next, we need ', strong('PKatt'), 'which we can get from looking at the last row of the ', strong('PKatt'), 'column in the', strong('Summary'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-              div(p(strong('PKatt'), '= 0'),
-                  style = 'padding-left: 2em;'),
-              p('Next, we need ', strong('SCA'), 'which we can get from looking at the last row of the ', strong('SCA'), 'column in the', strong('Summary'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-              div(p(strong('SCA'), '= 32'),
-                  style = 'padding-left: 2em;'),
-              p('Next, we need ', strong('Short_Cmp'), 'which we can get from looking at the last row of the ', strong('Cmp'), 'column in the', strong('Short'), 'section of the', strong('Passing'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-              div(p(strong('Short_Cmp'), '= 256'),
-                  style = 'padding-left: 2em;'),
-              p('Next, we need ', strong('TB'), 'which we can get from looking at the last row of the ', strong('TB'), 'column in the', strong('Pass Types'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-              div(p(strong('TB'), '= 1'),
-                  style = 'padding-left: 2em;'),
-              p('Next, we need ', strong('Dead'), 'which we can get from looking at the last row of the ', strong('Dead'), 'column in the', strong('Pass Types'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-              div(p(strong('Dead'), '= 43'),
-                  style = 'padding-left: 2em;'),
-              p('Next, we need ', strong('Clr'), 'which we can get from looking at the last row of the ', strong('Clr'), 'column in the', strong('Defensive Actions'), 'tab of the ', strong('Chelsea Player Stats'), 'table'),
-              div(p(strong('Clr'), '= 7'),
-                  style = 'padding-left: 2em;'),
-              p('Next, we need ', strong('Dist'), 'which we can get from looking at the ', strong('Dist'), 'column for the row of the date of the selected match in the', strong('Shooting'), 'tab of the ', strong('Manchester City Match Logs'), 'table'),
-              div(p(strong('Dist'), '= 14.6'),
-                  p('This table is NOT on the match page, it is found after you select the Match Logs tab for a specific team.', a('Here', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'is the link to that table for Machester City.'),
-                  style = 'padding-left: 2em;'),
-              p('Finally, we need ', strong('TklW'), 'which we can get from looking at the last row of the ', strong('TklW'), 'column in the', strong('Defensive Actions'), 'tab of the ', strong('Chelsea Player Stats'), 'table'),
-              div(p(strong('TklW'), '= 8'),
-                  style = 'padding-left: 2em;'),
-              br(),
-              p('Now, the values can be entered in the', strong('Calculate'), 'tab to get an updated XG prediction'),
-              p('For this match against Chelsea, Manchester City had an updated XG value of 2.95'),
-              p('For this match against Chelsea, Manchester City actually scored 3 goals')
+              fluidRow(
+                tabBox(
+                  width = 12,
+                  # selected = "Tab3",
+                  tabPanel(
+                    'Team',
+                    p('First, we need ', strong('Team'), 'which we can get from the drop-down menu for Team in the ', strong('Calculate'), 'tab of this app'),
+                    div(p(strong('Team'), '= Manchester-City'),
+                        style = 'padding-left: 2em;')
+                  ),
+                  tabPanel(
+                    'SoT',
+                    p('Next, we need ', strong('SoT'), 'which we can get from looking at the last row of the ', strong('SoT'), 'column in the', strong('Summary'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
+                    div(p(strong('SoT'), '= 6'),
+                        style = 'padding-left: 2em;')
+                  ),
+                  tabPanel(
+                    'Opp_Saves',
+                    p('Next, we need ', strong('Opp_Saves'), 'which we can get from looking at the ', strong('Saves'), 'column in the', strong('Chelsea Goalkeeper Stats'), 'table'),
+                    div(p(strong('Opp_Saves'), '= 3'),
+                        style = 'padding-left: 2em;')
+                  ),
+                  tabPanel(
+                    'PKatt',
+                    p('Next, we need ', strong('PKatt'), 'which we can get from looking at the last row of the ', strong('PKatt'), 'column in the', strong('Summary'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
+                    div(p(strong('PKatt'), '= 0'),
+                        style = 'padding-left: 2em;')
+                  ),
+                  tabPanel(
+                    'SCA',
+                    p('Next, we need ', strong('SCA'), 'which we can get from looking at the last row of the ', strong('SCA'), 'column in the', strong('Summary'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
+                    div(p(strong('SCA'), '= 32'),
+                        style = 'padding-left: 2em;')
+                  ),
+                  tabPanel(
+                    'Short_Cmp',
+                    p('Next, we need ', strong('Short_Cmp'), 'which we can get from looking at the last row of the ', strong('Cmp'), 'column in the', strong('Short'), 'section of the', strong('Passing'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
+                    div(p(strong('Short_Cmp'), '= 256'),
+                        style = 'padding-left: 2em;')
+                  ),
+                  tabPanel(
+                    'TB',
+                    p('Next, we need ', strong('TB'), 'which we can get from looking at the last row of the ', strong('TB'), 'column in the', strong('Pass Types'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
+                    div(p(strong('TB'), '= 1'),
+                        style = 'padding-left: 2em;')
+                  ),
+                  tabPanel(
+                    'Dead',
+                    p('Next, we need ', strong('Dead'), 'which we can get from looking at the last row of the ', strong('Dead'), 'column in the', strong('Pass Types'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
+                    div(p(strong('Dead'), '= 43'),
+                        style = 'padding-left: 2em;')
+                  ),
+                  tabPanel(
+                    'Clr',
+                    p('Next, we need ', strong('Clr'), 'which we can get from looking at the last row of the ', strong('Clr'), 'column in the', strong('Defensive Actions'), 'tab of the ', strong('Chelsea Player Stats'), 'table'),
+                    div(p(strong('Clr'), '= 7'),
+                        style = 'padding-left: 2em;')
+                  ),
+                  tabPanel(
+                    'Dist',
+                    p('Next, we need ', strong('Dist'), 'which we can get from looking at the ', strong('Dist'), 'column for the row of the date of the selected match in the', strong('Shooting'), 'tab of the ', strong('Manchester City Match Logs'), 'table'),
+                    div(p(strong('Dist'), '= 14.6'),
+                        style = 'padding-left: 2em;'),
+                    p(em('This table is NOT on the match page, it is found after you select the Match Logs tab for a specific team')), 
+                    p(a('Here', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'is the link to that table for Machester City'),
+                  ),
+                  tabPanel(
+                    'TklW',
+                    p('Finally, we need ', strong('TklW'), 'which we can get from looking at the last row of the ', strong('TklW'), 'column in the', strong('Defensive Actions'), 'tab of the ', strong('Chelsea Player Stats'), 'table'),
+                    div(p(strong('TklW'), '= 8'),
+                        style = 'padding-left: 2em;')
+                  )
+                )
+              ),
+              fluidRow(
+                column(2),
+                box(
+                  title = 'Predicting XG',
+                  width = 8,
+                  p('Now, the values can be selected in the', strong('Calculate'), 'tab to get an updated XG prediction'),
+                  p('For this match against Chelsea:'),
+                  div(p('Manchester City had an XG prediction of 2.95 goals'),
+                      p('Manchester City actually scored 3 goals'),
+                      style = 'padding-left: 2em;')
+                )
+              )
       ),
       tabItem(tabName = 'calculate',
               titlePanel('Premier League Expected Goals (PLXG)'),
