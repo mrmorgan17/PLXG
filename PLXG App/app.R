@@ -50,7 +50,7 @@ ui <- fluidPage(
                       p('These 10 variables were the 10 most important variables identified from an XGB model where all variables were used to build it.'),
                       br(),
                       div(p(strong('Built by'), a('Matthew Morgan', href = 'https://github.com/mrmorgan17'), 'using RStudio and Shiny'), 
-                          p(strong('R Packages:'), 'caret, caTools, rvest, shiny, shinyWidgets, tidyverse, vroom'),
+                          p(strong('R Packages:'), 'caret, caTools, ggplot2, rvest, shiny, shinyWidgets, tidyverse, vroom'),
                           p(strong('Sources:'), a('FBref.com', href = 'https://fbref.com/en'), 'for data'),
                           style = 'text-align: right;')),
              tabPanel('Example',
