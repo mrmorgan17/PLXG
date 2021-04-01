@@ -1,7 +1,9 @@
 library(shiny)
 library(shinyWidgets)
+library(ggplot2)
 
 PL_10 <- read.csv('PL_10.csv')
+Full_PL_10 <- read.csv('Full_PL_10.csv')
 PLXG.Model <- readRDS('PLXGModel.RData')
 
 # Define UI for slider demo app ----
@@ -150,9 +152,45 @@ ui <- fluidPage(
                                div(id = 'container', p('Updated Expected Goals prediction for the selected team:'), verbatimTextOutput('UpdatedXG')),
                                br(),
                                div(id = 'container', p('Difference in Expected Goals predictions (Updated XG - Average XG):'), verbatimTextOutput('DiffXG'))
-                      )
+                        ))),
+             tabPanel('Visualization',
+                      titlePanel('Premier League Expected Goals (PLXG)'),
                       
-))))
+                      # Generate a row with a sidebar
+                      fluidRow(      
+                        column(3,
+                               selectInput('PlotTeam', 'Team:', 
+                                      choices = c('', unique(sort(Full_PL_10$Team)))),
+                               br(),
+                               selectInput('Variable', 'Variable:',
+                                           choices = c('', 'Goals', 'SoT', 'Opp_Saves', 'PKatt', 'SCA_Total', 'Short_Cmp', 'TB', 'Dead', 'Clr', 'Dist', 'TklW')),
+                               br(),
+                               sliderInput('nBins', 'Number of Bins', value = 10, min = 0, max = 50, step = 5, ticks = FALSE),
+                               br()),
+                               # actionBttn(inputId = 'plotButton', label = 'Plot', color = 'primary', style = 'fill')),
+                        column(9,
+                               plotOutput('dataPlot'))
+                      ),
+                      fluidRow(
+                        column(12,
+                               align = 'center',
+                               conditionalPanel(
+                                 condition = "input.PlotTeam != '' & input.Variable != ''",
+                                 br(),
+                                 div(id = 'container', p('Average value of '), verbatimTextOutput('Variable'), 'for ', verbatimTextOutput('PlotTeam'), '=', verbatimTextOutput('AvgVariable')),
+                                 br(),
+                                 br(),
+                                 div(id = 'container', p('Average value of '), verbatimTextOutput('VariableCopy'), 'across all Premier League Teams =', verbatimTextOutput('LeagueAvgVariable'))
+                               ),
+                               br(),
+                               br(),
+                               div(p('Plots are created with Premier League data from the following campaigns:'),
+                                   p('2017-2018'),
+                                   p('2018-2019'),
+                                   p('2019-2020'),
+                                   style = 'text-align: right;')
+                      ))
+)))
 
 # Define server logic ----
 server <- function(input, output, session) {
@@ -213,6 +251,47 @@ server <- function(input, output, session) {
     updateNumericInput(session, 'Clr', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Clr), digits = 2), min = 0, max = 100)
     updateNumericInput(session, 'Dist', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Dist), digits = 2), min = 0, max = 100)
     updateNumericInput(session, 'TklW', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(TklW), digits = 2), min = 0, max = 100)
+  })
+  
+  output$dataPlot <- renderPlot({
+    # input$plotButton 
+    # isolate(
+      ggplot(data.frame(x = Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), aes(x)) + 
+        geom_histogram(aes(y = ..density..), 
+                       bins = input$nBins,
+                       color = 'black', 
+                       fill = '#1d89ff') +
+        stat_function(fun = dnorm,
+                      args = list(mean = mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)),
+                                  sd = sd(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable))),
+                      col = 'red',
+                      size = 2) +
+        xlab(input$Variable) +
+        ylab('Density')
+    # )
+  })
+  
+  output$PlotTeam <- renderText({
+    input$plotButton
+    isolate(
+      ifelse(input$PlotTeam == '', 'No Team Selected', input$PlotTeam)
+    )
+  })
+  
+  output$Variable <- renderText({
+    ifelse(input$Variable == '', 'No Variable Selected', input$Variable)
+  })
+  
+  output$VariableCopy <- renderText({
+    ifelse(input$Variable == '', 'No Variable Selected', input$Variable)
+  })
+  
+  output$AvgVariable <- renderText({
+    ifelse(input$PlotTeam == '' | input$Variable == '', 0, round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), digits = 2))
+  })
+  
+  output$LeagueAvgVariable <- renderText({
+    ifelse(input$PlotTeam == '' | input$Variable == '', 0, round(mean(Full_PL_10 %>% pull(input$Variable)), digits = 2))
   })
   
 }

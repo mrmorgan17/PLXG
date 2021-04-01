@@ -7,6 +7,10 @@ pl_team_data <- vroom('Pl_team_match_data.csv') %>% mutate(Dist = ifelse(is.na(D
                                                            Opp_GK_AvgLen = ifelse(is.na(Opp_GK_AvgLen), 0, Opp_GK_AvgLen),
                                                            Opp_AvgDist = ifelse(is.na(Opp_AvgDist), 0, Opp_AvgDist))
 
+# For Visualization tab of app.R
+Full_PL_10 <- pl_team_data %>% select(Goals, Team, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW)
+
+write.csv(Full_PL_10, '/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/Full_PL_10.csv', row.names = FALSE)
 
 # Dist = 2 NA's
 # Opp_GK_AvgLen = 37 NA's
