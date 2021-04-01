@@ -116,7 +116,6 @@ ui <- dashboardPage(
       ),
       tabItem(tabName = 'calculate',
               titlePanel('Premier League Expected Goals (PLXG)'),
-              br(),
               fluidRow(
                 column(4,
                        selectInput('Team', 'Team:',
@@ -153,23 +152,29 @@ ui <- dashboardPage(
                 ),
               br(),
               fluidRow(
-                infoBoxOutput('XGBox'),
-                infoBoxOutput('UpdatedXGBox'),
-                infoBoxOutput('DiffXGBox')
+                conditionalPanel(
+                  condition = "input.Team != ''",
+                  infoBoxOutput('XGBox'),
+                  infoBoxOutput('UpdatedXGBox'),
+                  infoBoxOutput('DiffXGBox')
+                )
               ),
               fluidRow(
-                column(4,
-                  align = 'center',     
-                  p('Average Expected Goals prediction for the selected team')
-                ),
-                column(4,
-                  align = 'center',     
-                  p('Updated Expected Goals prediction for the selected team')
-                ),
-                column(4,
-                  align = 'center',     
-                  p('Difference in Expected Goals predictions'), 
-                  p(em('Updated XG - Average XG'))
+                conditionalPanel(
+                  condition = "input.Team != ''",
+                  column(4,
+                         align = 'center',     
+                         p('Average Expected Goals prediction for the selected team')
+                  ),
+                  column(4,
+                         align = 'center',     
+                         p('Updated Expected Goals prediction for the selected team')
+                  ),
+                  column(4,
+                         align = 'center',     
+                         p('Difference in Expected Goals'),
+                         p(em('Updated XG - Average XG'))
+                  )
                 )
               )
       ),
@@ -189,26 +194,42 @@ ui <- dashboardPage(
                 column(9,
                        plotOutput('dataPlot'))
                 ),
+              br(),
+              fluidRow(
+                conditionalPanel(
+                  condition = "input.PlotTeam != '' & input.Variable != ''",
+                  infoBoxOutput('AvgBox'),
+                  infoBoxOutput('LeagueAvgBox'),
+                  infoBoxOutput('DiffAvgBox')
+                )
+              ),
+              fluidRow(
+                conditionalPanel(
+                  condition = "input.PlotTeam != '' & input.Variable != ''",
+                  column(4,
+                    align = 'center',
+                    div(id = 'container', strong(textOutput('Variable')), p('average for'), strong(textOutput('PlotTeam')))
+                  ),
+                  column(4,
+                    align = 'center',
+                    div(id = 'container', strong(textOutput('VariableCopy')), p('average across all Premier League Teams'))
+                  ),
+                  column(4,
+                    align = 'center',
+                    p(em('Team Average - League Average'))
+                  )
+                )
+              ),
+              br(),
               fluidRow(
                 column(12,
-                       align = 'center',
-                       conditionalPanel(
-                         condition = "input.PlotTeam != '' & input.Variable != ''",
-                         br(),
-                         div(id = 'container', p('Average value of '), verbatimTextOutput('Variable'), 'for ', verbatimTextOutput('PlotTeam'), '=', verbatimTextOutput('AvgVariable')),
-                         br(),
-                         br(),
-                         div(id = 'container', p('Average value of '), verbatimTextOutput('VariableCopy'), 'across all Premier League Teams =', verbatimTextOutput('LeagueAvgVariable'))
-                         ),
-                       br(),
-                       br(),
-                       div(p('Plots are created with Premier League data from the following campaigns:'),
-                           p('2017-2018'),
-                           p('2018-2019'),
-                           p('2019-2020'),
-                           style = 'text-align: right;')
-                       )
+                  div(p('Plots are created with Premier League data from the following campaigns:'),
+                      p('2017-2018'),
+                      p('2018-2019'),
+                      p('2019-2020'),
+                      style = 'text-align: right;')
                 )
+              )
       )
     )
   )
@@ -271,11 +292,19 @@ server <- function(input, output, session) {
   output$DiffXGBox <- renderInfoBox({
     infoBox(
       'Diff XG', 
-      ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
-             0, 
+      ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error',
+             0,
              round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)),
       icon = icon('futbol'),
-      color = 'light-blue',
+      color = if (class(try(round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error') {
+        'black'
+      } else if (round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2) < 0) {
+        'red'
+      } else if (round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2) > 0) {
+        'green'
+      } else {
+        'black'
+      },
       fill = TRUE
     )
   })
@@ -330,8 +359,52 @@ server <- function(input, output, session) {
     ifelse(input$PlotTeam == '' | input$Variable == '', 0, round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), digits = 2))
   })
   
+  output$AvgBox <- renderInfoBox({
+    infoBox(
+      'Team Average', 
+      ifelse(input$PlotTeam == '' | input$Variable == '', 
+             0, 
+             round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), digits = 2)),
+      icon = icon('futbol'),
+      color = 'light-blue',
+      fill = TRUE
+    )
+  })
+  
   output$LeagueAvgVariable <- renderText({
     ifelse(input$PlotTeam == '' | input$Variable == '', 0, round(mean(Full_PL_10 %>% pull(input$Variable)), digits = 2))
+  })
+  
+  output$LeagueAvgBox <- renderInfoBox({
+    infoBox(
+      'League Average', 
+      ifelse(input$PlotTeam == '' | input$Variable == '', 
+             0, 
+             round(mean(Full_PL_10 %>% pull(input$Variable)), digits = 2)),
+      icon = icon('futbol'),
+      color = 'light-blue',
+      fill = TRUE
+    )
+  })
+  
+  output$DiffAvgBox <- renderInfoBox({
+    infoBox(
+      'Difference',
+      ifelse(input$PlotTeam == '' | input$Variable == '', 
+             0, 
+             round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), digits = 2)),
+      icon = icon('futbol'),
+      color = if (input$PlotTeam == '' | input$Variable == '') {
+        'black'
+      } else if (round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), digits = 2) < 0) {
+        'red'
+      } else if (round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), digits = 2) > 0) {
+        'green'
+      } else {
+        'black'
+      },
+      fill = TRUE
+    )
   })
   
 }
