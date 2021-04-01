@@ -234,7 +234,7 @@ server <- function(input, output, session) {
     infoBox(
       'Average XG', 
       ifelse(class(try(round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
-             'No Team Selected', 
+             0, 
              round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)),
       icon = icon('futbol'),
       color = 'light-blue',
@@ -260,7 +260,7 @@ server <- function(input, output, session) {
     infoBox(
       'Updated XG', 
       ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2), silent = TRUE)) == 'try-error', 
-             'No Team Selected', 
+             0, 
              round(predict(PLXG.Model, selectedValues()), digits = 2)),
       icon = icon('futbol'),
       color = 'light-blue',
@@ -272,7 +272,7 @@ server <- function(input, output, session) {
     infoBox(
       'Diff XG', 
       ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
-             'No Team Selected', 
+             0, 
              round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)),
       icon = icon('futbol'),
       color = 'light-blue',
