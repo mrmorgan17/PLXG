@@ -19,6 +19,10 @@ ui <- dashboardPage(
     )
   ),
   dashboardBody(
+    tags$head(tags$style("
+                        #container * {
+         display: inline;
+                           }")),
     tabItems(
       tabItem(tabName = 'about',
               titlePanel('Premier League Expected Goals (PLXG)'),
@@ -115,7 +119,6 @@ ui <- dashboardPage(
               br(),
               fluidRow(
                 column(4,
-                       p('Select a Premier League Team to get started'),
                        selectInput('Team', 'Team:',
                                    choices = c('', unique(PL_10$Team)),
                                    selected = ''),
@@ -150,16 +153,25 @@ ui <- dashboardPage(
                 ),
               br(),
               fluidRow(
-                column(12,
-                       align = 'center',
-                       br(),
-                       div(id = 'container', p('Average Expected Goals prediction for the selected team:'), verbatimTextOutput('XG')),
-                       br(),
-                       div(id = 'container', p('Updated Expected Goals prediction for the selected team:'), verbatimTextOutput('UpdatedXG')),
-                       br(),
-                       div(id = 'container', p('Difference in Expected Goals predictions (Updated XG - Average XG):'), verbatimTextOutput('DiffXG'))
-                       )
+                infoBoxOutput('XGBox'),
+                infoBoxOutput('UpdatedXGBox'),
+                infoBoxOutput('DiffXGBox')
+              ),
+              fluidRow(
+                column(4,
+                  align = 'center',     
+                  p('Average Expected Goals prediction for the selected team')
+                ),
+                column(4,
+                  align = 'center',     
+                  p('Updated Expected Goals prediction for the selected team')
+                ),
+                column(4,
+                  align = 'center',     
+                  p('Difference in Expected Goals predictions'), 
+                  p(em('Updated XG - Average XG'))
                 )
+              )
       ),
       tabItem(tabName = 'visualization',
               titlePanel('Premier League Expected Goals (PLXG)'),
@@ -218,10 +230,16 @@ server <- function(input, output, session) {
     updateNumericInput(session, 'TklW', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(TklW), digits = 2), min = 0, max = 100)
   })
   
-  output$XG <- renderText({
-    ifelse(class(try(round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
-           'No Team Selected', 
-           round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2))
+  output$XGBox <- renderInfoBox({
+    infoBox(
+      'Average XG', 
+      ifelse(class(try(round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
+             'No Team Selected', 
+             round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)),
+      icon = icon('futbol'),
+      color = 'light-blue',
+      fill = TRUE
+    )
   })
   
   selectedValues <- eventReactive(input$updateButton, {
@@ -238,16 +256,28 @@ server <- function(input, output, session) {
                TklW = input$TklW) 
   })
   
-  output$UpdatedXG <- renderText({
-    ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2), silent = TRUE)) == 'try-error', 
-           'No Team Selected', 
-           round(predict(PLXG.Model, selectedValues()), digits = 2))
+  output$UpdatedXGBox <- renderInfoBox({
+    infoBox(
+      'Updated XG', 
+      ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2), silent = TRUE)) == 'try-error', 
+             'No Team Selected', 
+             round(predict(PLXG.Model, selectedValues()), digits = 2)),
+      icon = icon('futbol'),
+      color = 'light-blue',
+      fill = TRUE
+    )
   })
   
-  output$DiffXG <- renderText({
-    ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
-           'No Team Selected', 
-           round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2))
+  output$DiffXGBox <- renderInfoBox({
+    infoBox(
+      'Diff XG', 
+      ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
+             'No Team Selected', 
+             round(predict(PLXG.Model, selectedValues()), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)),
+      icon = icon('futbol'),
+      color = 'light-blue',
+      fill = TRUE
+    )
   })
   
   observeEvent(input$resetButton, {
