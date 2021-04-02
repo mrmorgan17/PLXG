@@ -333,26 +333,6 @@ ui <- dashboardPage(
             infoBoxOutput('CalculatedXGBox'),
             infoBoxOutput('DiffXGBox')
           )
-        ),
-        fluidRow(
-          conditionalPanel(
-            condition = "input.Team != ''",
-            box(
-              width = 4,
-              align = 'center', 
-              div(id = 'container', p('Average Expected Goals prediction for'), strong(textOutput('TeamCopy2')))
-            ),
-            box(
-              width = 4,
-              align = 'center', 
-              div(id = 'container', p('Calculated Expected Goals prediction for'), strong(textOutput('TeamCopy3')))
-            ),
-            box(
-              width = 4,
-              align = 'center',
-              p(em('Calculated XG - Average XG'))
-            )
-          )
         )
       ),
       tabItem(
@@ -383,26 +363,6 @@ ui <- dashboardPage(
             infoBoxOutput('AvgBox'),
             infoBoxOutput('LeagueAvgBox'),
             infoBoxOutput('DiffAvgBox')
-          )
-        ),
-        fluidRow(
-          conditionalPanel(
-            condition = "input.PlotTeam != '' & input.Variable != ''",
-            box(
-              width = 4,
-              align = 'center',
-              div(id = 'container', strong(textOutput('Variable')), p('average for'), strong(textOutput('PlotTeam')))
-            ),
-            box(
-              width = 4,
-              align = 'center',
-              div(id = 'container', strong(textOutput('VariableCopy')), p('average across all Premier League teams'))
-            ),
-            box(
-              width = 4,
-              align = 'center',
-              p(em('Team Average - League Average'))
-            )
           )
         ),
         fluidRow(
@@ -450,7 +410,10 @@ server <- function(input, output, session) {
       'Average XG', 
       ifelse(class(try(round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
              0, 
-             round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)),
+             round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), 
+                   digits = 2)
+      ),
+      subtitle = input$Team,
       icon = icon('futbol'),
       color = 'light-blue',
       fill = TRUE
@@ -481,6 +444,7 @@ server <- function(input, output, session) {
              round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), 
                    digits = 2)
       ),
+      subtitle = input$Team,
       icon = icon('futbol'),
       color = 'light-blue',
       fill = TRUE
@@ -493,6 +457,7 @@ server <- function(input, output, session) {
       ifelse(class(try(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error',
              0,
              round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())) - predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)),
+      subtitle = em('Calculated XG - Average XG'),
       icon = icon('futbol'),
       color = if (class(try(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error') {
         'black'
@@ -556,10 +521,13 @@ server <- function(input, output, session) {
   
   output$AvgBox <- renderInfoBox({
     infoBox(
-      'Team Average', 
+      p(input$Variable, 'Average'), 
       ifelse(input$PlotTeam == '' | input$Variable == '', 
              0, 
-             round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), digits = 2)),
+             round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), 
+                   digits = 2)
+      ),
+      subtitle = input$PlotTeam,
       icon = icon('futbol'),
       color = 'light-blue',
       fill = TRUE
@@ -575,7 +543,10 @@ server <- function(input, output, session) {
       'League Average', 
       ifelse(input$PlotTeam == '' | input$Variable == '', 
              0, 
-             round(mean(Full_PL_10 %>% pull(input$Variable)), digits = 2)),
+             round(mean(Full_PL_10 %>% pull(input$Variable)), 
+                   digits = 2)
+      ),
+      subtitle = input$Variable,
       icon = icon('futbol'),
       color = 'light-blue',
       fill = TRUE
@@ -584,10 +555,13 @@ server <- function(input, output, session) {
   
   output$DiffAvgBox <- renderInfoBox({
     infoBox(
-      'Difference',
+      p(input$Variable, 'Difference'),
       ifelse(input$PlotTeam == '' | input$Variable == '', 
              0, 
-             round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), digits = 2)),
+             round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), 
+                   digits = 2)
+      ),
+      subtitle = em('Team Average - League Average'),
       icon = icon('futbol'),
       color = if (input$PlotTeam == '' | input$Variable == '') {
         'black'
