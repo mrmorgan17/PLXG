@@ -134,7 +134,7 @@ ui <- dashboardPage(
             title = 'Goal',
             width = 10,
             collapsible = TRUE,
-            p(em('To walkthrough how to get a team\'s predicted XG for a ceratin match'))
+            p(em('To walkthrough how to get a team\'s predicted XG for a certain match'))
           )
         ),
         fluidRow(
