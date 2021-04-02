@@ -167,7 +167,7 @@ ui <- dashboardPage(
             width = 10,
             tabPanel(
               'Team',
-              p(strong('Team'), 'is selected in the drop-down menu for Team in the', strong('Calculate'), 'tab of this app'),
+              p(strong('Team'), 'is selected in the drop-down menu in the', strong('Calculate'), 'tab of this app'),
               div(
                 p(em('Team = Manchester-City')),
                 style = 'padding-left: 2em;'
