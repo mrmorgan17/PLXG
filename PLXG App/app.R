@@ -369,12 +369,12 @@ ui <- dashboardPage(
             selectInput('Variable', 'Variable:',
                         choices = c('', 'Goals', 'SoT', 'Opp_Saves', 'PKatt', 'SCA_Total', 'Short_Cmp', 'TB', 'Dead', 'Clr', 'Dist', 'TklW')),
             br(),
-            sliderInput('nBins', 'Number of Bins', value = 10, min = 0, max = 50, step = 5, ticks = FALSE),
+            sliderInput('nBins', 'Number of Bins', value = 5, min = 0, max = 50, step = 5, ticks = FALSE),
             br()
           ),
-          # actionBttn(inputId = 'plotButton', label = 'Plot', color = 'primary', style = 'fill')),
           column(9,
-                 plotOutput('dataPlot'))
+                 plotOutput('dataPlot')
+          )
         ),
         br(),
         fluidRow(
@@ -516,21 +516,18 @@ server <- function(input, output, session) {
   })
   
   output$dataPlot <- renderPlot({
-    # input$plotButton 
-    # isolate(
-      ggplot(data.frame(x = Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), aes(x)) + 
-        geom_histogram(aes(y = ..density..), 
-                       bins = input$nBins,
-                       color = 'black', 
-                       fill = '#a9daff') +
-        stat_function(fun = dnorm,
-                      args = list(mean = mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)),
-                                  sd = sd(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable))),
-                      col = '#f04848',
-                      size = 2) +
-        xlab(input$Variable) +
-        ylab('Density')
-    # )
+    ggplot(data.frame(x = Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), aes(x)) + 
+      geom_histogram(aes(y = ..density..), 
+                     bins = input$nBins,
+                     color = 'black', 
+                     fill = '#a9daff') +
+      stat_function(fun = dnorm,
+                    args = list(mean = mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)),
+                                sd = sd(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable))),
+                    col = '#f04848',
+                    size = 2) +
+      xlab(input$Variable) +
+      ylab('Density')
   })
   
   output$PlotTeam <- renderText({
