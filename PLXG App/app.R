@@ -59,19 +59,19 @@ ui <- dashboardPage(
           h1('Premier League Expected Goals (PLXG)', align = 'center')
         ),
         fluidRow(
-          column(2),
+          column(1),
           box(
             title = 'Goal',
-            width = 8,
+            width = 10,
             collapsible = TRUE,
             p('To predict Expected Goals (XG) per match for Premier League teams')
           )
         ),
         fluidRow(
-          column(2),
+          column(1),
           box(
             title = 'Data Glossary',
-            width = 8,
+            width = 10,
             collapsible = TRUE,
             p('These are the variables of interest:'),
             div(
@@ -91,10 +91,10 @@ ui <- dashboardPage(
           )
         ),
         fluidRow(
-          column(2),
+          column(1),
           box(
             title = 'Web Scraping',
-            width = 8,
+            width = 10,
             collapsible = TRUE,
             collapsed = TRUE,
             p('Match data for each team was web scraped for the following Premier League campaigns:'),
@@ -109,10 +109,10 @@ ui <- dashboardPage(
           )
         ),
         fluidRow(
-          column(2),
+          column(1),
           box(
             title = 'Modeling',
-            width = 8,
+            width = 10,
             collapsible = TRUE,
             collapsed = TRUE,
             p('This dataset was then used to build various models in an effort to predict the number of goals that would be scored by a particular team in any given match'),
@@ -132,19 +132,19 @@ ui <- dashboardPage(
           h1('Premier League Expected Goals (PLXG)', align = 'center')
         ),
         fluidRow(
-          column(2),
+          column(1),
           box(
             title = 'Goal',
-            width = 8,
+            width = 10,
             collapsible = TRUE,
             p(em('To walkthrough how to get an expected goals prediction for a specific Premier League match.'))
           )
         ),
         fluidRow(
-          column(2),
+          column(1),
           box(
             title = 'How to Find Specific Match Data on FBref',
-            width = 8,
+            width = 10,
             collapsible = TRUE,
             p('Starting from the', a('homepage', href = 'https://fbref.com/en')),
             div(
@@ -162,9 +162,9 @@ ui <- dashboardPage(
           ),
         ),
         fluidRow(
-          column(2),
+          column(1),
           tabBox(
-            width = 8,
+            width = 10,
             tabPanel(
               'Team',
               p(strong('Team'), 'is selected in the drop-down menu for Team in the', strong('Calculate'), 'tab of this app'),
@@ -172,7 +172,7 @@ ui <- dashboardPage(
                 p(em('Team = Manchester-City')),
                 style = 'padding-left: 2em;'
               ),
-              p(strong('Note:'), em('All other values are on the FBref match page'))
+              p(strong('Note:'), em('All other values are on the FBref match page'), align = 'right')
             ),
             tabPanel(
               'SoT',
@@ -245,8 +245,8 @@ ui <- dashboardPage(
                 p(em('Dist = 14.6')),
                 style = 'padding-left: 2em;'
               ),
-              p(strong('Note:'), em('This table is NOT on the match page, it is on the'), strong('Match Logs'), em('tab for a specific team on FBref')), 
-              p(a('Here', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'is the link to that table for Machester City'),
+              p(strong('Note:'), em('This table is NOT on the match page, it is on the'), strong('Match Logs'), em('tab for a specific team on FBref'), align = 'right'), 
+              p(em(a('Here', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'is the link to that table for Machester City'), align = 'right')
             ),
             tabPanel(
               'TklW',
@@ -259,10 +259,10 @@ ui <- dashboardPage(
           )
         ),
         fluidRow(
-          column(2),
+          column(1),
           box(
             title = 'Predict XG',
-            width = 8,
+            width = 10,
             collapsible = TRUE,
             p('Plug all values into the', strong('Calculate'), 'tab to get an updated XG prediction'),
             p('For this match against Chelsea:'),
