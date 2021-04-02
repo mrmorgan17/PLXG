@@ -64,7 +64,7 @@ ui <- dashboardPage(
             title = 'Goal',
             width = 10,
             collapsible = TRUE,
-            p('To predict Expected Goals (XG) per match for Premier League teams')
+            p(em('To predict Expected Goals (XG) per match for Premier League teams'))
           )
         ),
         fluidRow(
