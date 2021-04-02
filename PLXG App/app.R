@@ -267,7 +267,7 @@ ui <- dashboardPage(
             width = 10,
             collapsible = TRUE,
             p('Plug all values into the', strong('XG Variables'), 'section in the', strong('Calculate'), 'tab'),
-            p('Click the', strong('Calculate XG'), 'button to get an updated XG prediction'),
+            p('Click the', strong('Calculate XG'), 'button to get an XG prediction'),
             p('For this match against Chelsea:'),
             div(
               p('Manchester City had an XG prediction of 2.95 goals'),
