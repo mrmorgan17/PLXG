@@ -11,34 +11,37 @@ PLXG.Model <- readRDS('PLXGModel.RData')
 ui <- dashboardPage(
   dashboardHeader(
     title = 'PLXG',
-    dropdownMenu(type = 'messages',
-                 badgeStatus = NULL,
-                 icon = icon('address-card'),
-                 headerText = 'About this Shiny application:',
-                 messageItem(
-                   from = 'Author',
-                   message = helpText('Matthew Morgan'),
-                   time = '4/1/2021',
-                   href = 'https://github.com/mrmorgan17'
-                 ),
-                 messageItem(
-                   from = 'Data Source',
-                   message = helpText('FBref.com'),
-                   icon = icon('database'),
-                   href = 'https://fbref.com/en'
-                 ),
-                 messageItem(
-                   from = 'R Packages',
-                   message = div(helpText('caret, caTools, ggplot2, rvest,'),
-                                 helpText('shiny, shinydashboard, shinyWidgets,'),
-                                 helpText('tidyverse, vroom')), 
-                   icon = icon('box-open')
-                 )
+    dropdownMenu(
+      type = 'messages',
+      badgeStatus = NULL,
+      icon = icon('address-card'),
+      headerText = 'About this Shiny application:',
+      messageItem(
+        from = 'Author',
+        message = helpText('Matthew Morgan'),
+        time = '4/1/2021',
+        href = 'https://github.com/mrmorgan17'
+      ),
+      messageItem(
+        from = 'Data Source',
+        message = helpText('FBref.com'),
+        icon = icon('database'),
+        href = 'https://fbref.com/en'
+      ),
+      messageItem(
+        from = 'R Packages',
+        message = div(
+          helpText('caret, caTools, ggplot2, rvest,'),
+          helpText('shiny, shinydashboard, shinyWidgets,'),
+          helpText('tidyverse, vroom')
+        ), 
+        icon = icon('box-open')
+      )
     )
   ),
   dashboardSidebar(
     sidebarMenu(
-      menuItem('About', tabName = 'about', icon = icon('info')),
+      menuItem('Introduction', tabName = 'introduction', icon = icon('info')),
       menuItem('Example', tabName = 'example', icon = icon('futbol')),
       menuItem('Calculate', tabName = 'calculate', icon = icon('calculator')),
       menuItem('Visualization', tabName = 'visualization', icon = icon('chart-area'))
@@ -50,286 +53,356 @@ ui <- dashboardPage(
          display: inline;
                            }")),
     tabItems(
-      tabItem(tabName = 'about',
-              titlePanel('Premier League Expected Goals (PLXG)'),
-              p('This application estimates eXpected Goals (XG) values per match for each Premier League team'),
-              p('Average XG values for each team have already been calculated.'),
-              p('Users can input their own values to see how XG values would update for each team.'),
-              br(),
-              p('Match data for each team was web scraped for the following Premier League campaigns:'),
-              div(p('2017-2018'),
-                  p('2018-2019'),
-                  p('2019-2020'),
-                  style = 'padding-left: 2em;'),
-              p('Code for how web scraping was done is available ', a('here', href = 'https://github.com/mrmorgan17/PLXG/blob/main/FBref_scraper.R'), 'on my GitHub profile'),
-              p('The dataset created from the web scraping is available ', a('here', href = 'https://github.com/mrmorgan17/PLXG/blob/main/Pl_team_match_data.csv'), 'on my GitHub profile as a .csv file'),
-              br(),
-              p('This dataset was then used to build various models in an effort to predict the number of goals that would be scored by a particular team in any given match.'),
-              p('Models were trained to minimize the Root Mean Square Error', strong('RMSE'), 'which in this case is:'),
-              withMathJax(),
-              p('$$\\mathrm{RMSE}=\\sqrt{\\frac{\\sum_{i=1}^{N}\\left(\\mathrm{Actual\\,Goals}_{i} - \\mathrm{Predicted\\,Goals}_{i}\\right)^{2}}N}$$'),
-              p('The best model and the one used in this app is an eXtreme Gradient Boosted ', strong('XGB'), 'model. This model had RMSE values of approximately .3'),
-              p('The specifics of the XGB model along with the other models created are in this ', a('R script', href = 'https://github.com/mrmorgan17/PLXG/blob/main/PLXG_modeling.R'), 'on my GitHub profile'),
-              p('The best XGB model was built using these 10 variables:'),
-              div(p(strong('SoT:'), 'Shots on target'),
-                  p(strong('Opp_Saves:'), em('Opposing'), 'goalkeeper saves'),
-                  p(strong('PKatt:'), 'Penalty kicks attempted'),
-                  p(strong('SCA:'), 'The two offensive actions directly leading to a shot, such as passes, dribbles and drawing fouls.'),
-                  p(strong('Short_Cmp:'), 'Passes completed between 5 and 15 yards'),
-                  p(strong('TB:'), 'Completed passes sent between back defenders into open space'),
-                  p(strong('Dead:'), 'Dead-ball passes (Includes free kicks, corner kicks, kick offs, throw-ins and goal kicks)'),
-                  p(strong('Clr:'), em('Opposing'), 'team clearances'),
-                  p(strong('Dist:'), 'Average distance, in yards, from goal of all shots taken (Does not include penalty kicks)'),
-                  p(strong('TklW:'), 'Tackles in which the', em('opposing'), 'team won possession of the ball'),
-                  style = 'padding-left: 2em;'),
-              p('These 10 variables were the 10 most important variables identified from an XGB model where all variables were used to build it.'),
+      tabItem(
+        tabName = 'introduction',
+        titlePanel('Premier League Expected Goals (PLXG)'),
+        fluidRow(
+          box(
+            title = 'Purpose',
+            width = 8,
+            collapsible = TRUE,
+            p('This application predicts Expected Goals (XG) per match for Premier League teams')
+          )
+        ),
+        fluidRow(
+          box(
+            title = 'Data Glossary',
+            width = 8,
+            collapsible = TRUE,
+            p('These are the variables of interest:'),
+            div(
+              p(strong('Team:'), 'A Premier League team', em('(2017-2020)')),
+              p(strong('SoT:'), 'Shots on target'),
+              p(strong('Opp_Saves:'), em('Opposing team'), 'goalkeeper saves'),
+              p(strong('PKatt:'), 'Penalty kicks attempted'),
+              p(strong('SCA:'), 'The two offensive actions directly leading to a shot, such as passes, dribbles and drawing fouls.'),
+              p(strong('Short_Cmp:'), 'Passes completed between 5 and 15 yards'),
+              p(strong('TB:'), 'Completed passes sent between back defenders into open space'),
+              p(strong('Dead:'), 'Dead-ball passes (Includes free kicks, corner kicks, kick offs, throw-ins and goal kicks)'),
+              p(strong('Clr:'), em('Opposing team'), 'clearances'),
+              p(strong('Dist:'), 'Average distance, in yards, from goal of all shots taken (Does not include penalty kicks)'),
+              p(strong('TklW:'), 'Tackles in which the', em('opposing team'), 'won possession of the ball'),
+              style = 'padding-left: 2em;'
+            )
+          )
+        ),
+        fluidRow(
+          box(
+            title = 'Web Scraping',
+            width = 8,
+            collapsible = TRUE,
+            collapsed = TRUE,
+            p('Match data for each team was web scraped for the following Premier League campaigns:'),
+            div(
+              p('2017-2018'),
+              p('2018-2019'),
+              p('2019-2020'),
+              style = 'padding-left: 2em;'
+            ),
+            p('Code for how web scraping was done is available ', a('here', href = 'https://github.com/mrmorgan17/PLXG/blob/main/FBref_scraper.R'), 'on my GitHub profile'),
+            p('The dataset created from the web scraping is available ', a('here', href = 'https://github.com/mrmorgan17/PLXG/blob/main/Pl_team_match_data.csv'), 'on my GitHub profile as a', em('.csv'), 'file')
+          )
+        ),
+        fluidRow(
+          box(
+            title = 'Modeling',
+            width = 8,
+            collapsible = TRUE,
+            collapsed = TRUE,
+            p('This dataset was then used to build various models in an effort to predict the number of goals that would be scored by a particular team in any given match'),
+            p('Models were trained to minimize the Root Mean Square Error', strong('RMSE'), 'which in this case is:'),
+            withMathJax(),
+            p('$$\\mathrm{RMSE}=\\sqrt{\\frac{\\sum_{i=1}^{N}\\left(\\mathrm{Actual\\,Goals}_{i} - \\mathrm{Predicted\\,Goals}_{i}\\right)^{2}}N}$$'),
+            p('The best model', em('and the one used in this app'), 'is an Extreme Gradient Boosted ', strong('XGBoost'), 'model. This model had RMSE values of approximately .3'),
+            p('The specifics of the XGBoost model along with the other models created are in this ', a('R script', href = 'https://github.com/mrmorgan17/PLXG/blob/main/PLXG_modeling.R'), 'on my GitHub profile'),
+            p('The best XGBoost model was built using the 10 most important variables'), 
+            p('These 10 most important variables were identified from an XGBoost model where all possible variables were used')
+          )
+        )
       ),
-      tabItem(tabName = 'example',
-              titlePanel('Premier League Expected Goals (PLXG)'),
-              p(em('This is a walkthrough of how to get an expected goals prediction for a specific Premier League match.')),
-              fluidRow(
-                column(2),
-                box(
-                  title = 'Getting specific match data from FBref',
-                  width = 8,
-                  collapsible = TRUE,
-                  p('Starting from the', a('homepage', href = 'https://fbref.com/en')),
-                  div(p('Go to the ', strong('Competitions'), 'tab and select ', strong('English Premier League.')),
-                      p('Then, select a team from the ', strong('League Table')),
-                      p('From there, select the ', strong('Match Logs'), 'tab and then select the ', strong('Scores & Fixtures'), 'link for the', strong('Premier League')),
-                      p('Finally, select the date of the match you are interested in'),
-                      style = 'padding-left: 2em;'),
-                  p('This is the', a('link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the specific FBref match page')
-                ),
-              ),
+      tabItem(
+        tabName = 'example',
+        titlePanel('Premier League Expected Goals (PLXG)'),
+        p(em('This is a walkthrough of how to get an expected goals prediction for a specific Premier League match.')),
+        fluidRow(
+          column(2),
+          box(
+            title = 'How to Find Specific Match Data on FBref',
+            width = 8,
+            collapsible = TRUE,
+            p('Starting from the', a('homepage', href = 'https://fbref.com/en')),
+            div(
+              p('Go to the ', strong('Competitions'), 'tab and select ', strong('English Premier League.')),
+              p('Then, select a team from the ', strong('League Table')),
+              p('From there, select the ', strong('Match Logs'), 'tab and then select the ', strong('Scores & Fixtures'), 'link for the', strong('Premier League')),
+              p('Finally, select the date of the match you are interested in'),
+              style = 'padding-left: 2em;'
+            ),
+            p('This is a', a('link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the specific FBref match page'),
+            div(
               p(em('For this example, we will look at Manchester City in their match against Chelsea on January 3rd 2021')),
-              fluidRow(
-                tabBox(
-                  width = 12,
-                  # selected = "Tab3",
-                  tabPanel(
-                    'Team',
-                    p(strong('Team'), 'is selected in the drop-down menu for Team in the', strong('Calculate'), 'tab of this app'),
-                    div(p(em('Team = Manchester-City')),
-                        style = 'padding-left: 2em;'),
-                    p(strong('Note:'), em('All other values are on the FBref match page'))
-                  ),
-                  tabPanel(
-                    'SoT',
-                    p('To get', strong('SoT'), 'look at the last row of the', strong('SoT'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
-                    div(p(em('SoT = 6')),
-                        style = 'padding-left: 2em;')
-                  ),
-                  tabPanel(
-                    'Opp_Saves',
-                    p('To get', strong('Opp_Saves'), 'look at the', strong('Saves'), 'column in the', strong('Chelsea Goalkeeper Stats'), 'table'),
-                    div(p(em('Opp_Saves = 3')),
-                        style = 'padding-left: 2em;')
-                  ),
-                  tabPanel(
-                    'PKatt',
-                    p('To get', strong('PKatt'), 'look at the last row of the', strong('PKatt'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
-                    div(p(em('PKatt= 0')),
-                        style = 'padding-left: 2em;')
-                  ),
-                  tabPanel(
-                    'SCA',
-                    p('To get', strong('SCA'), 'look at the last row of the', strong('SCA'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
-                    div(p(em('SCA = 32')),
-                        style = 'padding-left: 2em;')
-                  ),
-                  tabPanel(
-                    'Short_Cmp',
-                    p('To get', strong('Short_Cmp'), 'look at the last row of the', strong('Cmp'), 'column in the', strong('Short'), 'section of the', strong('Passing'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
-                    div(p(em('Short_Cmp = 256')),
-                        style = 'padding-left: 2em;')
-                  ),
-                  tabPanel(
-                    'TB',
-                    p('To get', strong('TB'), 'look at the last row of the', strong('TB'), 'column in the', strong('Pass Types'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
-                    div(p(em('TB = 1')),
-                        style = 'padding-left: 2em;')
-                  ),
-                  tabPanel(
-                    'Dead',
-                    p('To get', strong('Dead'), 'look at the last row of the', strong('Dead'), 'column in the', strong('Pass Types'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
-                    div(p(em('Dead = 43')),
-                        style = 'padding-left: 2em;')
-                  ),
-                  tabPanel(
-                    'Clr',
-                    p('To get', strong('Clr'), 'look at the last row of the', strong('Clr'), 'column in the', strong('Defensive Actions'), 'tab of the', strong('Chelsea Player Stats'), 'table'),
-                    div(p(em('Clr = 7')),
-                        style = 'padding-left: 2em;')
-                  ),
-                  tabPanel(
-                    'Dist',
-                    p('To get', strong('Dist'), 'look at the ', strong('Dist'), 'column for the row of the date of the selected match in the', strong('Shooting'), 'tab of the', strong('Manchester City Match Logs'), 'table'),
-                    div(p(em('Dist = 14.6')),
-                        style = 'padding-left: 2em;'),
-                    p(strong('Note:'), em('This table is NOT on the match page, it is on the'), strong('Match Logs'), em('tab for a specific team on FBref')), 
-                    p(a('Here', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'is the link to that table for Machester City'),
-                  ),
-                  tabPanel(
-                    'TklW',
-                    p('To get', strong('TklW'), 'look at the last row of the', strong('TklW'), 'column in the', strong('Defensive Actions'), 'tab of the', strong('Chelsea Player Stats'), 'table'),
-                    div(p(em('TklW = 8')),
-                        style = 'padding-left: 2em;')
-                  )
-                )
+              style = 'padding-left: 2em;'
+            )
+          ),
+        ),
+        fluidRow(
+          tabBox(
+            width = 12,
+            # selected = "Tab3",
+            tabPanel(
+              'Team',
+              p(strong('Team'), 'is selected in the drop-down menu for Team in the', strong('Calculate'), 'tab of this app'),
+              div(
+                p(em('Team = Manchester-City')),
+                style = 'padding-left: 2em;'
               ),
-              fluidRow(
-                column(2),
-                box(
-                  title = 'Predicting XG',
-                  width = 8,
-                  collapsible = TRUE,
-                  p('Now, the values can be selected in the', strong('Calculate'), 'tab to get an updated XG prediction'),
-                  p('For this match against Chelsea:'),
-                  div(p('Manchester City had an XG prediction of 2.95 goals'),
-                      p('Manchester City actually scored 3 goals'),
-                      style = 'padding-left: 2em;')
-                )
+              p(strong('Note:'), em('All other values are on the FBref match page'))
+            ),
+            tabPanel(
+              'SoT',
+              p('To get', strong('SoT'), 'look at the last row of the', strong('SoT'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+              div(
+                p(em('SoT = 6')),
+                style = 'padding-left: 2em;'
               )
+            ),
+            tabPanel(
+              'Opp_Saves',
+              p('To get', strong('Opp_Saves'), 'look at the', strong('Saves'), 'column in the', strong('Chelsea Goalkeeper Stats'), 'table'),
+              div(
+                p(em('Opp_Saves = 3')),
+                style = 'padding-left: 2em;'
+              )
+            ),
+            tabPanel(
+              'PKatt',
+              p('To get', strong('PKatt'), 'look at the last row of the', strong('PKatt'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+              div(
+                p(em('PKatt= 0')),
+                style = 'padding-left: 2em;'
+              )
+            ),
+            tabPanel(
+              'SCA',
+              p('To get', strong('SCA'), 'look at the last row of the', strong('SCA'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+              div(
+                p(em('SCA = 32')),
+                style = 'padding-left: 2em;'
+              )
+            ),
+            tabPanel(
+              'Short_Cmp',
+              p('To get', strong('Short_Cmp'), 'look at the last row of the', strong('Cmp'), 'column in the', strong('Short'), 'section of the', strong('Passing'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
+              div(
+                p(em('Short_Cmp = 256')),
+                style = 'padding-left: 2em;'
+              )
+            ),
+            tabPanel(
+              'TB',
+              p('To get', strong('TB'), 'look at the last row of the', strong('TB'), 'column in the', strong('Pass Types'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+              div(
+                p(em('TB = 1')),
+                style = 'padding-left: 2em;'
+              )
+            ),
+            tabPanel(
+              'Dead',
+              p('To get', strong('Dead'), 'look at the last row of the', strong('Dead'), 'column in the', strong('Pass Types'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+              div(
+                p(em('Dead = 43')),
+                style = 'padding-left: 2em;'
+              )
+            ),
+            tabPanel(
+              'Clr',
+              p('To get', strong('Clr'), 'look at the last row of the', strong('Clr'), 'column in the', strong('Defensive Actions'), 'tab of the', strong('Chelsea Player Stats'), 'table'),
+              div(
+                p(em('Clr = 7')),
+                style = 'padding-left: 2em;'
+              )
+            ),
+            tabPanel(
+              'Dist',
+              p('To get', strong('Dist'), 'look at the ', strong('Dist'), 'column for the row of the date of the selected match in the', strong('Shooting'), 'tab of the', strong('Manchester City Match Logs'), 'table'),
+              div(
+                p(em('Dist = 14.6')),
+                style = 'padding-left: 2em;'
+              ),
+              p(strong('Note:'), em('This table is NOT on the match page, it is on the'), strong('Match Logs'), em('tab for a specific team on FBref')), 
+              p(a('Here', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'is the link to that table for Machester City'),
+            ),
+            tabPanel(
+              'TklW',
+              p('To get', strong('TklW'), 'look at the last row of the', strong('TklW'), 'column in the', strong('Defensive Actions'), 'tab of the', strong('Chelsea Player Stats'), 'table'),
+              div(
+                p(em('TklW = 8')),
+                style = 'padding-left: 2em;'
+              )
+            )
+          )
+        ),
+        fluidRow(
+          column(2),
+          box(
+            title = 'Predict XG',
+            width = 8,
+            collapsible = TRUE,
+            p('Plug all values into the', strong('Calculate'), 'tab to get an updated XG prediction'),
+            p('For this match against Chelsea:'),
+            div(
+              p('Manchester City had an XG prediction of 2.95 goals'),
+              p('Manchester City actually scored 3 goals'),
+              style = 'padding-left: 2em;')
+          )
+        )
       ),
-      tabItem(tabName = 'calculate',
-              titlePanel('Premier League Expected Goals (PLXG)'),
-              fluidRow(
-                box(
-                  width = 4,
-                  selectInput('Team', 'Team:',
-                              choices = c('', unique(PL_10$Team)),
-                              selected = ''),
-                  p('The 10 variables that appear are the ones used by the model to predict XG for a team'),
-                  p('Initially shown are the average values of the 10 variables for the selected team'),
-                  p('An average XG prediction is also calculated'),
-                  p('The user may enter their own inputs for each variable to calculate an updated XG prediction for the team')
-                ),
-                box(
-                  width = 2,
-                  conditionalPanel(
-                    condition = "input.Team != ''",
-                    numericInput('SoT', 'SoT:', value = 0, min = 0, max = 100, step = .01),
-                    numericInput('Opp_Saves', 'Opp_Saves:',  value = 0, min = 0, max = 100, step = .01),
-                    numericInput('PKatt', 'PKatt:', value = 0, min = 0, max = 100, step = .01),
-                    numericInput('SCA_Total', 'SCA:', value = 0, min = 0, max = 100, step = .01),
-                    numericInput('Short_Cmp', 'Short_Cmp:', value = 0, min = 0, max = 1000, step = .01)
-                  )
-                ),
-                box(
-                  width = 2,
-                  conditionalPanel(
-                    condition = "input.Team != ''",
-                    numericInput('TB', 'TB:', value = 0, min = 0, max = 100, step = .01),
-                    numericInput('Dead', 'Dead:', value = 0, min = 0, max = 100, step = .01),
-                    numericInput('Clr', 'Clr:', value = 0, min = 0, max = 100, step = .01),
-                    numericInput('Dist', 'Dist:', value = 0, min = 0, max = 100, step = .01),
-                    numericInput('TklW', 'TklW:', value = 0, min = 0,  max = 100, step = .01)
-                  )
-                ),
-                box(
-                  width = 4,
-                  align = 'center',
-                  p('Click the button to update the team\'s XG prediction'),
-                  actionBttn(inputId = 'updateButton', label = 'Update XG', color = 'default', style = 'fill'),
-                  br(),
-                  br(),
-                  p('Click the button to reset the variables of the selected team back to their initial average values'),
-                  actionBttn(inputId = 'resetButton', label = 'Reset', color = 'default', style = 'fill'))
-                ),
-              br(),
-              fluidRow(
-                conditionalPanel(
-                  condition = "input.Team != ''",
-                  infoBoxOutput('XGBox'),
-                  infoBoxOutput('UpdatedXGBox'),
-                  infoBoxOutput('DiffXGBox')
-                )
-              ),
-              fluidRow(
-                conditionalPanel(
-                  condition = "input.Team != ''",
-                  box(
-                    width = 4,
-                    align = 'center', 
-                    p('Average Expected Goals prediction for the selected team')
-                  ),
-                  box(
-                    width = 4,
-                    align = 'center', 
-                    p('Updated Expected Goals prediction for the selected team')
-                  ),
-                  box(
-                    width = 4,
-                    align = 'center',
-                    p(em('Updated XG - Average XG'))
-                  )
-                )
-              )
+      tabItem(
+        tabName = 'calculate',
+        titlePanel('Premier League Expected Goals (PLXG)'),
+        fluidRow(
+          box(
+            width = 4,
+            selectInput('Team', 'Team:',
+                        choices = c('', unique(PL_10$Team)),
+                        selected = ''),
+            p('When a team is selected:'),
+            div(
+              p('The 10 variables that appear are the ones used by the model to predict XG'),
+              p('Initially shown are the average values of the 10 variables for the selected team'),
+              p('An average XG prediction is calculated'),
+              p('Other values for each variable may be entered to calculate an updated XG prediction for the team'),
+              style = 'padding-left: 2em;'
+            )
+          ),
+          box(
+            width = 2,
+            conditionalPanel(
+              condition = "input.Team != ''",
+              numericInput('SoT', 'SoT:', value = 0, min = 0, max = 100, step = .01),
+              numericInput('Opp_Saves', 'Opp_Saves:',  value = 0, min = 0, max = 100, step = .01),
+              numericInput('PKatt', 'PKatt:', value = 0, min = 0, max = 100, step = .01),
+              numericInput('SCA_Total', 'SCA:', value = 0, min = 0, max = 100, step = .01),
+              numericInput('Short_Cmp', 'Short_Cmp:', value = 0, min = 0, max = 1000, step = .01)
+            )
+          ),
+          box(
+            width = 2,
+            conditionalPanel(
+              condition = "input.Team != ''",
+              numericInput('TB', 'TB:', value = 0, min = 0, max = 100, step = .01),
+              numericInput('Dead', 'Dead:', value = 0, min = 0, max = 100, step = .01),
+              numericInput('Clr', 'Clr:', value = 0, min = 0, max = 100, step = .01),
+              numericInput('Dist', 'Dist:', value = 0, min = 0, max = 100, step = .01),
+              numericInput('TklW', 'TklW:', value = 0, min = 0,  max = 100, step = .01)
+            )
+          ),
+          box(
+            width = 4,
+            align = 'center',
+            p('Click the button to update the team\'s XG prediction'),
+            actionBttn(inputId = 'updateButton', label = 'Update XG', color = 'default', style = 'fill'),
+            br(),
+            br(),
+            p('Click the button to reset the variables of the selected team back to their initial average values'),
+            actionBttn(inputId = 'resetButton', label = 'Reset', color = 'default', style = 'fill'))
+        ),
+        br(),
+        fluidRow(
+          conditionalPanel(
+            condition = "input.Team != ''",
+            infoBoxOutput('XGBox'),
+            infoBoxOutput('UpdatedXGBox'),
+            infoBoxOutput('DiffXGBox')
+          )
+        ),
+        fluidRow(
+          conditionalPanel(
+            condition = "input.Team != ''",
+            box(
+              width = 4,
+              align = 'center', 
+              p('Average Expected Goals prediction for the selected team')
+            ),
+            box(
+              width = 4,
+              align = 'center', 
+              p('Updated Expected Goals prediction for the selected team')
+            ),
+            box(
+              width = 4,
+              align = 'center',
+              p(em('Updated XG - Average XG'))
+            )
+          )
+        )
       ),
-      tabItem(tabName = 'visualization',
-              titlePanel('Premier League Expected Goals (PLXG)'),
-              fluidRow(
-                box(
-                  width = 3,
-                  selectInput('PlotTeam', 'Team:',
-                              choices = c('', unique(sort(Full_PL_10$Team)))),
-                  br(),
-                  selectInput('Variable', 'Variable:',
-                              choices = c('', 'Goals', 'SoT', 'Opp_Saves', 'PKatt', 'SCA_Total', 'Short_Cmp', 'TB', 'Dead', 'Clr', 'Dist', 'TklW')),
-                  br(),
-                  sliderInput('nBins', 'Number of Bins', value = 10, min = 0, max = 50, step = 5, ticks = FALSE),
-                  br()
-                ),
-                # actionBttn(inputId = 'plotButton', label = 'Plot', color = 'primary', style = 'fill')),
-                column(9,
-                       plotOutput('dataPlot'))
-                ),
-              br(),
-              fluidRow(
-                conditionalPanel(
-                  condition = "input.PlotTeam != '' & input.Variable != ''",
-                  infoBoxOutput('AvgBox'),
-                  infoBoxOutput('LeagueAvgBox'),
-                  infoBoxOutput('DiffAvgBox')
-                )
-              ),
-              fluidRow(
-                conditionalPanel(
-                  condition = "input.PlotTeam != '' & input.Variable != ''",
-                  box(
-                    width = 4,
-                    align = 'center',
-                    div(id = 'container', strong(textOutput('Variable')), p('average for'), strong(textOutput('PlotTeam')))
-                  ),
-                  box(
-                    width = 4,
-                    align = 'center',
-                    div(id = 'container', strong(textOutput('VariableCopy')), p('average across all Premier League Teams'))
-                  ),
-                  box(
-                    width = 4,
-                    align = 'center',
-                    p(em('Team Average - League Average'))
-                  )
-                )
-              ),
-              fluidRow(
-                box(
-                  title = 'Data Info',
-                  collapsible = TRUE,
-                  collapsed = TRUE,
-                  p('Plots are created with Premier League data from the following campaigns:'),
-                  div(p('2017-2018'),
-                      p('2018-2019'),
-                      p('2019-2020'),
-                      style = 'text-align: left;')
-                )
-              )
+      tabItem(
+        tabName = 'visualization',
+        titlePanel('Premier League Expected Goals (PLXG)'),
+        fluidRow(
+          box(
+            width = 3,
+            selectInput('PlotTeam', 'Team:',
+                        choices = c('', unique(sort(Full_PL_10$Team)))),
+            br(),
+            selectInput('Variable', 'Variable:',
+                        choices = c('', 'Goals', 'SoT', 'Opp_Saves', 'PKatt', 'SCA_Total', 'Short_Cmp', 'TB', 'Dead', 'Clr', 'Dist', 'TklW')),
+            br(),
+            sliderInput('nBins', 'Number of Bins', value = 10, min = 0, max = 50, step = 5, ticks = FALSE),
+            br()
+          ),
+          # actionBttn(inputId = 'plotButton', label = 'Plot', color = 'primary', style = 'fill')),
+          column(9,
+                 plotOutput('dataPlot'))
+        ),
+        br(),
+        fluidRow(
+          conditionalPanel(
+            condition = "input.PlotTeam != '' & input.Variable != ''",
+            infoBoxOutput('AvgBox'),
+            infoBoxOutput('LeagueAvgBox'),
+            infoBoxOutput('DiffAvgBox')
+          )
+        ),
+        fluidRow(
+          conditionalPanel(
+            condition = "input.PlotTeam != '' & input.Variable != ''",
+            box(
+              width = 4,
+              align = 'center',
+              div(id = 'container', strong(textOutput('Variable')), p('average for'), strong(textOutput('PlotTeam')))
+            ),
+            box(
+              width = 4,
+              align = 'center',
+              div(id = 'container', strong(textOutput('VariableCopy')), p('average across all Premier League Teams'))
+            ),
+            box(
+              width = 4,
+              align = 'center',
+              p(em('Team Average - League Average'))
+            )
+          )
+        ),
+        fluidRow(
+          box(
+            title = 'Data Info',
+            collapsible = TRUE,
+            collapsed = TRUE,
+            p('Plots are created with Premier League data from the following campaigns:'),
+            div(
+              p('2017-2018'),
+              p('2018-2019'),
+              p('2019-2020'),
+              style = 'text-align: left;'
+            )
+          )
+        )
       )
-    )
+    )  
   )
-)
+)  
 
 # Define server
 server <- function(input, output, session) {
