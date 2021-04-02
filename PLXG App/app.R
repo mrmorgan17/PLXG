@@ -5,7 +5,6 @@ library(shinydashboard)
 library(ggplot2)
 library(tidyverse)
 
-PL_10 <- read.csv('PL_10.csv')
 Full_PL_10 <- read.csv('Full_PL_10.csv')
 PLXG.Model <- readRDS('PLXGModel.RData')
 
@@ -468,16 +467,16 @@ server <- function(input, output, session) {
   output$TeamCopy2 <- renderText(input$Team)
   
   observeEvent(input$Team, {
-    updateNumericInput(session, 'SoT', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(SoT), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Opp_Saves', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'PKatt', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(PKatt), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'SCA_Total', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Short_Cmp', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp), digits = 2), min = 0, max = 1000)
-    updateNumericInput(session, 'TB', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(TB), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Dead', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Dead), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Clr', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Clr), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Dist', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Dist), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'TklW', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(TklW), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'SoT', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SoT)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Opp_Saves', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'PKatt', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(PKatt)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'SCA_Total', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Short_Cmp', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp)), digits = 2), min = 0, max = 1000)
+    updateNumericInput(session, 'TB', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TB)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Dead', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dead)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Clr', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Clr)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Dist', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dist)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'TklW', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TklW)), digits = 2), min = 0, max = 100)
   })
   
   selectedValues <- eventReactive(input$calculateButton, {
@@ -512,11 +511,26 @@ server <- function(input, output, session) {
   })
   
   output$XGBox <- renderInfoBox({
+    
+    Avg_10 <- data.frame(
+      Team = input$Team, 
+      SoT = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SoT)), 
+      Opp_Saves = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves)), 
+      PKatt = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(PKatt)), 
+      SCA_Total = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total)), 
+      Short_Cmp = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp)), 
+      TB = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TB)), 
+      Dead = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dead)), 
+      Clr = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Clr)), 
+      Dist = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dist)), 
+      TklW = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TklW))
+    )
+    
     infoBox(
       'Average XG', 
-      ifelse(class(try(round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
+      ifelse(class(try(round(predict(PLXG.Model, Avg_10), digits = 2), silent = TRUE)) == 'try-error', 
              0, 
-             round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), 
+             round(predict(PLXG.Model, Avg_10), 
                    digits = 2)
       ),
       subtitle = input$Team,
@@ -548,16 +562,16 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$resetButton, {
-    updateNumericInput(session, 'SoT', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(SoT), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Opp_Saves', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'PKatt', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(PKatt), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'SCA_Total', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Short_Cmp', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp), digits = 2), min = 0, max = 1000)
-    updateNumericInput(session, 'TB', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(TB), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Dead', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Dead), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Clr', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Clr), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Dist', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(Dist), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'TklW', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(TklW), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'SoT', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SoT)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Opp_Saves', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'PKatt', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(PKatt)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'SCA_Total', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Short_Cmp', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp)), digits = 2), min = 0, max = 1000)
+    updateNumericInput(session, 'TB', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TB)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Dead', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dead)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Clr', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Clr)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Dist', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dist)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'TklW', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TklW)), digits = 2), min = 0, max = 100)
   })
   
   output$dataPlot <- renderPlot({
