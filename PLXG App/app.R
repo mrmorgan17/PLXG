@@ -360,7 +360,7 @@ ui <- dashboardPage(
             ),
             conditionalPanel(
               condition = "input.PlotTeam != '' & input.Variable != ''",
-              sliderInput('nBins', 'Number of Bins', value = 5, min = 0, max = 50, step = 5, ticks = FALSE)
+              sliderInput('nBins', 'Number of Bins', value = 5, min = 5, max = 30, step = 5, ticks = FALSE)
             )
           ),
           conditionalPanel(
