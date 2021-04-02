@@ -146,7 +146,7 @@ ui <- dashboardPage(
             title = 'How to Find Specific Match Data on FBref',
             width = 10,
             collapsible = TRUE,
-            p('Starting from the', a('homepage', href = 'https://fbref.com/en')),
+            p('Start on the', a('homepage', href = 'https://fbref.com/en')),
             div(
               p('Find the', strong('Competitions'), 'tab and select ', strong('English Premier League')),
               p('Select a', strong('Team'), 'from the', strong('League Table')),
@@ -154,7 +154,7 @@ ui <- dashboardPage(
               p('Select the', strong('Date'), 'of the match'),
               style = 'padding-left: 2em;'
             ),
-            p('This is a', a('link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the specific FBref match page'),
+            p(a('Link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the specific FBref match page'),
             div(
               p(em('For this example, Manchester City\'s match against Chelsea on 1/3/2021 will be analyzed')),
               style = 'padding-left: 2em;'
