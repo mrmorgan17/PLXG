@@ -73,21 +73,17 @@ ui <- dashboardPage(
             title = 'Data Glossary',
             width = 10,
             collapsible = TRUE,
-            p('Variables of Interest:'),
-            div(
-              p(strong('Team:'), 'A Premier League team', em('(2017-2020)')),
-              p(strong('SoT:'), 'Shots on target'),
-              p(strong('Opp_Saves:'), em('Opposing team'), 'goalkeeper saves'),
-              p(strong('PKatt:'), 'Penalty kicks attempted'),
-              p(strong('SCA:'), 'Live-ball passes, dead-ball passes, successful dribbles, shots, fouls drawn, and defensive actions that lead to a shot attempt'),
-              p(strong('Short_Cmp:'), 'Passes completed between 5 and 15 yards'),
-              p(strong('TB:'), 'Completed passes sent between back defenders into open space'),
-              p(strong('Dead:'), 'Dead-ball passes', em('(Includes free kicks, corner kicks, kick offs, throw-ins and goal kicks)')),
-              p(strong('Clr:'), em('Opposing team'), 'clearances'),
-              p(strong('Dist:'), 'Average distance, in yards, from goal of all shots taken', em('(Does not include penalty kicks)')),
-              p(strong('TklW:'), 'Tackles in which the', em('opposing team'), 'won possession of the ball'),
-              style = 'padding-left: 2em;'
-            )
+            p(strong('Team:'), 'A Premier League team', em('(2017-2020)')),
+            p(strong('SoT:'), 'Shots on target'),
+            p(strong('Opp_Saves:'), em('Opposing team'), 'goalkeeper saves'),
+            p(strong('PKatt:'), 'Penalty kicks attempted'),
+            p(strong('SCA:'), 'Live-ball passes, dead-ball passes, successful dribbles, shots, fouls drawn, and defensive actions that lead to a shot attempt'),
+            p(strong('Short_Cmp:'), 'Passes completed between 5 and 15 yards'),
+            p(strong('TB:'), 'Completed passes sent between back defenders into open space'),
+            p(strong('Dead:'), 'Dead-ball passes', em('(Includes free kicks, corner kicks, kick offs, throw-ins and goal kicks)')),
+            p(strong('Clr:'), em('Opposing team'), 'clearances'),
+            p(strong('Dist:'), 'Average distance, in yards, from goal of all shots taken', em('(Does not include penalty kicks)')),
+            p(strong('TklW:'), 'Tackles in which the', em('opposing team'), 'won possession of the ball')
           )
         ),
         fluidRow(
@@ -176,7 +172,7 @@ ui <- dashboardPage(
             ),
             tabPanel(
               'SoT',
-              p('To get', strong('SoT'), 'look at the last row of the', strong('SoT'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+              p(strong('SoT'), 'is in the last row of the', strong('SoT'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
               div(
                 p(em('SoT = 6')),
                 style = 'padding-left: 2em;'
@@ -184,7 +180,7 @@ ui <- dashboardPage(
             ),
             tabPanel(
               'Opp_Saves',
-              p('To get', strong('Opp_Saves'), 'look at the', strong('Saves'), 'column in the', strong('Chelsea Goalkeeper Stats'), 'table'),
+              p(strong('Opp_Saves'), 'is in the', strong('Saves'), 'column in the', strong('Chelsea Goalkeeper Stats'), 'table'),
               div(
                 p(em('Opp_Saves = 3')),
                 style = 'padding-left: 2em;'
@@ -192,7 +188,7 @@ ui <- dashboardPage(
             ),
             tabPanel(
               'PKatt',
-              p('To get', strong('PKatt'), 'look at the last row of the', strong('PKatt'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+              p(strong('PKatt'), 'is in the last row of the', strong('PKatt'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
               div(
                 p(em('PKatt= 0')),
                 style = 'padding-left: 2em;'
@@ -200,7 +196,7 @@ ui <- dashboardPage(
             ),
             tabPanel(
               'SCA',
-              p('To get', strong('SCA'), 'look at the last row of the', strong('SCA'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+              p(strong('SCA'), 'is in the last row of the', strong('SCA'), 'column in the', strong('Summary'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
               div(
                 p(em('SCA = 32')),
                 style = 'padding-left: 2em;'
@@ -208,7 +204,7 @@ ui <- dashboardPage(
             ),
             tabPanel(
               'Short_Cmp',
-              p('To get', strong('Short_Cmp'), 'look at the last row of the', strong('Cmp'), 'column in the', strong('Short'), 'section of the', strong('Passing'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
+              p(strong('Short_Cmp'), 'is in the last row of the', strong('Cmp'), 'column in the', strong('Short'), 'section of the', strong('Passing'), 'tab of the ', strong('Manchester City Player Stats'), 'table'),
               div(
                 p(em('Short_Cmp = 256')),
                 style = 'padding-left: 2em;'
@@ -216,7 +212,7 @@ ui <- dashboardPage(
             ),
             tabPanel(
               'TB',
-              p('To get', strong('TB'), 'look at the last row of the', strong('TB'), 'column in the', strong('Pass Types'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+              p(strong('TB'), 'is in the last row of the', strong('TB'), 'column in the', strong('Pass Types'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
               div(
                 p(em('TB = 1')),
                 style = 'padding-left: 2em;'
@@ -224,7 +220,7 @@ ui <- dashboardPage(
             ),
             tabPanel(
               'Dead',
-              p('To get', strong('Dead'), 'look at the last row of the', strong('Dead'), 'column in the', strong('Pass Types'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
+              p(strong('Dead'), 'is in the last row of the', strong('Dead'), 'column in the', strong('Pass Types'), 'tab of the', strong('Manchester City Player Stats'), 'table'),
               div(
                 p(em('Dead = 43')),
                 style = 'padding-left: 2em;'
@@ -232,7 +228,7 @@ ui <- dashboardPage(
             ),
             tabPanel(
               'Clr',
-              p('To get', strong('Clr'), 'look at the last row of the', strong('Clr'), 'column in the', strong('Defensive Actions'), 'tab of the', strong('Chelsea Player Stats'), 'table'),
+              p(strong('Clr'), 'is in the last row of the', strong('Clr'), 'column in the', strong('Defensive Actions'), 'tab of the', strong('Chelsea Player Stats'), 'table'),
               div(
                 p(em('Clr = 7')),
                 style = 'padding-left: 2em;'
@@ -240,7 +236,7 @@ ui <- dashboardPage(
             ),
             tabPanel(
               'Dist',
-              p('To get', strong('Dist'), 'look at the ', strong('Dist'), 'column for the row of the date of the selected match in the', strong('Shooting'), 'tab of the', strong('Manchester City Match Logs'), 'table'),
+              p(strong('Dist'), 'is in the ', strong('Dist'), 'column for the row of the date of the selected match in the', strong('Shooting'), 'tab of the', strong('Manchester City Match Logs'), 'table'),
               div(
                 p(em('Dist = 14.6')),
                 style = 'padding-left: 2em;'
@@ -252,7 +248,7 @@ ui <- dashboardPage(
             ),
             tabPanel(
               'TklW',
-              p('To get', strong('TklW'), 'look at the last row of the', strong('TklW'), 'column in the', strong('Defensive Actions'), 'tab of the', strong('Chelsea Player Stats'), 'table'),
+              p(strong('TklW'), 'is in the last row of the', strong('TklW'), 'column in the', strong('Defensive Actions'), 'tab of the', strong('Chelsea Player Stats'), 'table'),
               div(
                 p(em('TklW = 8')),
                 style = 'padding-left: 2em;'
