@@ -281,7 +281,7 @@ ui <- dashboardPage(
             br(),
             br(),     
             dropdownButton(
-              h4(strong('Team:')),
+              h4(strong('Team')),
               selectInput('Team', label = NULL,
                           choices = c('', unique(PL_10$Team))),
               status = 'primary',
@@ -329,19 +329,19 @@ ui <- dashboardPage(
               background = 'light-blue',
               column(
                 width = 6,
-                numericInput('SoT', 'SoT:', value = 0, min = 0, max = 100, step = .01),
-                numericInput('Opp_Saves', 'Opp_Saves:',  value = 0, min = 0, max = 100, step = .01),
-                numericInput('PKatt', 'PKatt:', value = 0, min = 0, max = 100, step = .01),
-                numericInput('SCA_Total', 'SCA:', value = 0, min = 0, max = 100, step = .01),
-                numericInput('Short_Cmp', 'Short_Cmp:', value = 0, min = 0, max = 1000, step = .01)
+                numericInput('SoT', 'SoT', value = 0, min = 0, max = 100, step = .01),
+                numericInput('Opp_Saves', 'Opp_Saves',  value = 0, min = 0, max = 100, step = .01),
+                numericInput('PKatt', 'PKatt', value = 0, min = 0, max = 100, step = .01),
+                numericInput('SCA_Total', 'SCA', value = 0, min = 0, max = 100, step = .01),
+                numericInput('Short_Cmp', 'Short_Cmp', value = 0, min = 0, max = 1000, step = .01)
               ),
               column(
                 width = 6,
-                numericInput('TB', 'TB:', value = 0, min = 0, max = 100, step = .01),
-                numericInput('Dead', 'Dead:', value = 0, min = 0, max = 100, step = .01),
-                numericInput('Clr', 'Clr:', value = 0, min = 0, max = 100, step = .01),
-                numericInput('Dist', 'Dist:', value = 0, min = 0, max = 100, step = .01),
-                numericInput('TklW', 'TklW:', value = 0, min = 0,  max = 100, step = .01)
+                numericInput('TB', 'TB', value = 0, min = 0, max = 100, step = .01),
+                numericInput('Dead', 'Dead', value = 0, min = 0, max = 100, step = .01),
+                numericInput('Clr', 'Clr', value = 0, min = 0, max = 100, step = .01),
+                numericInput('Dist', 'Dist', value = 0, min = 0, max = 100, step = .01),
+                numericInput('TklW', 'TklW', value = 0, min = 0,  max = 100, step = .01)
               )
             )
           ),
@@ -371,8 +371,8 @@ ui <- dashboardPage(
         fluidRow(
           conditionalPanel(
             condition = "input.Team != ''",
-            infoBoxOutput('XGBox'),
             infoBoxOutput('CalculatedXGBox'),
+            infoBoxOutput('XGBox'),
             infoBoxOutput('DiffXGBox')
           )
         )
@@ -390,7 +390,7 @@ ui <- dashboardPage(
             br(),
             br(),
             dropdownButton(
-              h4(strong('Team:')),
+              h4(strong('Team')),
               selectInput('PlotTeam', label = NULL, 
                           choices = c('', unique(sort(Full_PL_10$Team)))),
               status = 'primary',
@@ -405,7 +405,7 @@ ui <- dashboardPage(
             conditionalPanel(
               condition = "input.PlotTeam != ''",
               dropdownButton(
-                h4(strong('Variable:')),
+                h4(strong('Variable')),
                 selectInput('Variable', label = NULL,
                             choices = c('', 'Goals', 'SoT', 'Opp_Saves', 'PKatt', 'SCA_Total', 'Short_Cmp', 'TB', 'Dead', 'Clr', 'Dist', 'TklW')),
                 status = 'primary',
@@ -421,7 +421,7 @@ ui <- dashboardPage(
             conditionalPanel(
               condition = "input.PlotTeam != '' & input.Variable != ''",
               dropdownButton(
-                h4(strong('Bins:')),
+                h4(strong('Bins')),
                 sliderInput('nBins', label = NULL, value = 5, min = 5, max = 30, step = 5, ticks = FALSE),
                 status = 'primary',
                 size = 'lg',
@@ -477,21 +477,6 @@ server <- function(input, output, session) {
     updateNumericInput(session, 'TklW', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(TklW), digits = 2), min = 0, max = 100)
   })
   
-  output$XGBox <- renderInfoBox({
-    infoBox(
-      'Average XG', 
-      ifelse(class(try(round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
-             0, 
-             round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), 
-                   digits = 2)
-      ),
-      subtitle = input$Team,
-      icon = icon('futbol'),
-      color = 'light-blue',
-      fill = TRUE
-    )
-  })
-  
   selectedValues <- eventReactive(input$calculateButton, {
     data.frame(
       Team = input$Team, 
@@ -514,6 +499,21 @@ server <- function(input, output, session) {
       ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2), silent = TRUE)) == 'try-error', 
              0, 
              round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), 
+                   digits = 2)
+      ),
+      subtitle = input$Team,
+      icon = icon('futbol'),
+      color = 'light-blue',
+      fill = TRUE
+    )
+  })
+  
+  output$XGBox <- renderInfoBox({
+    infoBox(
+      'Average XG', 
+      ifelse(class(try(round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error', 
+             0, 
+             round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), 
                    digits = 2)
       ),
       subtitle = input$Team,
