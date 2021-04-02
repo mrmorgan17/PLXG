@@ -79,7 +79,7 @@ ui <- dashboardPage(
               p(strong('SoT:'), 'Shots on target'),
               p(strong('Opp_Saves:'), em('Opposing team'), 'goalkeeper saves'),
               p(strong('PKatt:'), 'Penalty kicks attempted'),
-              p(strong('SCA:'), 'Live-ball passes, dead-ball passes, successful dribbles, fouls drawn, and defensive actions that lead to a shot attempt'),
+              p(strong('SCA:'), 'Live-ball passes, dead-ball passes, successful dribbles, shots, fouls drawn, and defensive actions that lead to a shot attempt'),
               p(strong('Short_Cmp:'), 'Passes completed between 5 and 15 yards'),
               p(strong('TB:'), 'Completed passes sent between back defenders into open space'),
               p(strong('Dead:'), 'Dead-ball passes', em('(Includes free kicks, corner kicks, kick offs, throw-ins and goal kicks)')),
