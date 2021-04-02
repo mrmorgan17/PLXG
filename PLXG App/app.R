@@ -396,7 +396,7 @@ ui <- dashboardPage(
             box(
               width = 4,
               align = 'center',
-              div(id = 'container', strong(textOutput('VariableCopy')), p('average across all Premier League Teams'))
+              div(id = 'container', strong(textOutput('VariableCopy')), p('average across all Premier League teams'))
             ),
             box(
               width = 4,
