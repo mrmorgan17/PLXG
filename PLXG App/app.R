@@ -361,7 +361,11 @@ ui <- dashboardPage(
             conditionalPanel(
               condition = "input.PlotTeam != '' & input.Variable != ''",
               sliderInput('nBins', 'Number of Bins', value = 5, min = 5, max = 30, step = 5, ticks = FALSE)
-            )
+            ),
+            # conditionalPanel(
+            #   condition = "input.PlotTeam != '' & input.Variable != '' & input.nBins >= 5",
+            #   actionBttn(inputId = 'plotButton', label = 'Plot', color = 'default', style = 'fill')
+            # )
           ),
           conditionalPanel(
             condition = "input.PlotTeam != '' & input.Variable != ''",
@@ -494,32 +498,18 @@ server <- function(input, output, session) {
                      color = 'black', 
                      fill = '#a9daff') +
       stat_function(fun = dnorm,
-                    args = list(mean = mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)),
-                                sd = sd(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable))),
+                    args = list(
+                      mean = mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)),
+                      sd = sd(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable))
+                    ),
                     col = '#317196',
                     size = 2) +
       xlab(input$Variable) +
       ylab('Density')
   })
   
-  output$PlotTeam <- renderText({
-    input$plotButton
-    isolate(
-      ifelse(input$PlotTeam == '', 'No Team Selected', input$PlotTeam)
-    )
-  })
-  
-  output$Variable <- renderText({
-    ifelse(input$Variable == '', 'No Variable Selected', input$Variable)
-  })
-  
-  output$VariableCopy <- renderText({
-    ifelse(input$Variable == '', 'No Variable Selected', input$Variable)
-  })
-  
-  output$AvgVariable <- renderText({
-    ifelse(input$PlotTeam == '' | input$Variable == '', 0, round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), digits = 2))
-  })
+  output$PlotTeam <- renderText(input$PlotTeam)
+  output$Variable <- renderText(input$Variable)
   
   output$AvgBox <- renderInfoBox({
     infoBox(
@@ -534,10 +524,6 @@ server <- function(input, output, session) {
       color = 'light-blue',
       fill = TRUE
     )
-  })
-  
-  output$LeagueAvgVariable <- renderText({
-    ifelse(input$PlotTeam == '' | input$Variable == '', 0, round(mean(Full_PL_10 %>% pull(input$Variable)), digits = 2))
   })
   
   output$LeagueAvgBox <- renderInfoBox({
