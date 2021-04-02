@@ -288,8 +288,8 @@ ui <- dashboardPage(
             div(
               p('The 10 variables that appear are the ones used by the model to predict XG'),
               p('Initially shown are the average values of the 10 variables for the selected team'),
-              p('An average XG prediction is calculated'),
-              p('Other values for each variable may be entered to calculate an updated XG prediction'),
+              p('An average XG prediction is pre-calculated'),
+              p('Other values for each variable may be entered to calculate a new XG prediction'),
               style = 'padding-left: 2em;'
             )
           ),
@@ -318,8 +318,8 @@ ui <- dashboardPage(
           box(
             width = 4,
             align = 'center',
-            p('Click the button to update the team\'s XG prediction'),
-            actionBttn(inputId = 'updateButton', label = 'Update XG', color = 'default', style = 'fill'),
+            p('Click the button to calculate the team\'s XG prediction'),
+            actionBttn(inputId = 'calculateButton', label = 'Calculate XG', color = 'default', style = 'fill'),
             br(),
             br(),
             p('Click the button to reset the variables of the selected team back to their initial average values'),
@@ -330,7 +330,7 @@ ui <- dashboardPage(
           conditionalPanel(
             condition = "input.Team != ''",
             infoBoxOutput('XGBox'),
-            infoBoxOutput('UpdatedXGBox'),
+            infoBoxOutput('CalculatedXGBox'),
             infoBoxOutput('DiffXGBox')
           )
         ),
@@ -345,12 +345,12 @@ ui <- dashboardPage(
             box(
               width = 4,
               align = 'center', 
-              p('Updated Expected Goals prediction for the selected team')
+              p('Calculated Expected Goals prediction for the selected team')
             ),
             box(
               width = 4,
               align = 'center',
-              p(em('Updated XG - Average XG'))
+              p(em('Calculated XG - Average XG'))
             )
           )
         )
@@ -452,7 +452,7 @@ server <- function(input, output, session) {
     )
   })
   
-  selectedValues <- eventReactive(input$updateButton, {
+  selectedValues <- eventReactive(input$calculateButton, {
     data.frame(
       Team = input$Team, 
       SoT = input$SoT, 
@@ -468,9 +468,9 @@ server <- function(input, output, session) {
     ) 
   })
   
-  output$UpdatedXGBox <- renderInfoBox({
+  output$CalculatedXGBox <- renderInfoBox({
     infoBox(
-      'Updated XG', 
+      'Calculated XG', 
       ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2), silent = TRUE)) == 'try-error', 
              0, 
              round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), 
