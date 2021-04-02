@@ -289,7 +289,7 @@ ui <- dashboardPage(
               p('The 10 variables that appear are the ones used by the model to predict XG'),
               p('Initially shown are the average values of the 10 variables for the selected team'),
               p('An average XG prediction is calculated'),
-              p('Other values for each variable may be entered to calculate an updated XG prediction for the team'),
+              p('Other values for each variable may be entered to calculate an updated XG prediction'),
               style = 'padding-left: 2em;'
             )
           ),
