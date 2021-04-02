@@ -289,10 +289,13 @@ ui <- dashboardPage(
             conditionalPanel(
               condition = "input.Team != ''",
               div(
+                br(),
                 p('The 10 variables to the right are used by the XGBoost model to predict XG'),
+                br(),
                 div(id = 'container', p('Shown are the average values of the 10 variables for'), strong(textOutput('TeamCopy2'))),
                 br(),
                 p('An XG prediction is instantly calculated given these averages'),
+                br(),
                 p('Other values for each of the 10 variables may be entered to calculate a new XG prediction'),
                 style = 'padding-left: 2em;'
               )
@@ -325,11 +328,14 @@ ui <- dashboardPage(
               width = 4,
               align = 'center',
               div(id = 'container', p('Click the button to calculate the a new XG prediction for'), strong(textOutput('Team'))),
+              br(),
               actionBttn(inputId = 'calculateButton', label = 'Calculate XG', color = 'default', style = 'fill'),
               br(),
               br(),
               div(id = 'container', p('Click the button to reset variables for'), strong(textOutput('TeamCopy')), p('back to their initial values')),
-              actionBttn(inputId = 'resetButton', label = 'Reset', color = 'default', style = 'fill')
+              br(),
+              actionBttn(inputId = 'resetButton', label = 'Reset', color = 'default', style = 'fill'),
+              br()
             )
           )
         ),
