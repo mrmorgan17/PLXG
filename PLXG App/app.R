@@ -35,7 +35,7 @@ ui <- dashboardPage(
           helpText('shiny, shinydashboard, shinyWidgets,'),
           helpText('tidyverse, vroom')
         ), 
-        icon = icon('box-open')
+        icon = icon('box')
       )
     )
   ),
@@ -55,16 +55,20 @@ ui <- dashboardPage(
     tabItems(
       tabItem(
         tabName = 'introduction',
-        titlePanel('Premier League Expected Goals (PLXG)'),
+        titlePanel(
+          h1('Premier League Expected Goals (PLXG)', align = 'center')
+        ),
         fluidRow(
+          column(2),
           box(
-            title = 'Purpose',
+            title = 'Goal',
             width = 8,
             collapsible = TRUE,
-            p('This application predicts Expected Goals (XG) per match for Premier League teams')
+            p('To predict Expected Goals (XG) per match for Premier League teams')
           )
         ),
         fluidRow(
+          column(2),
           box(
             title = 'Data Glossary',
             width = 8,
@@ -87,6 +91,7 @@ ui <- dashboardPage(
           )
         ),
         fluidRow(
+          column(2),
           box(
             title = 'Web Scraping',
             width = 8,
@@ -104,6 +109,7 @@ ui <- dashboardPage(
           )
         ),
         fluidRow(
+          column(2),
           box(
             title = 'Modeling',
             width = 8,
@@ -122,8 +128,18 @@ ui <- dashboardPage(
       ),
       tabItem(
         tabName = 'example',
-        titlePanel('Premier League Expected Goals (PLXG)'),
-        p(em('This is a walkthrough of how to get an expected goals prediction for a specific Premier League match.')),
+        titlePanel(
+          h1('Premier League Expected Goals (PLXG)', align = 'center')
+        ),
+        fluidRow(
+          column(2),
+          box(
+            title = 'Goal',
+            width = 8,
+            collapsible = TRUE,
+            p(em('To walkthrough how to get an expected goals prediction for a specific Premier League match.'))
+          )
+        ),
         fluidRow(
           column(2),
           box(
@@ -146,9 +162,9 @@ ui <- dashboardPage(
           ),
         ),
         fluidRow(
+          column(2),
           tabBox(
-            width = 12,
-            # selected = "Tab3",
+            width = 8,
             tabPanel(
               'Team',
               p(strong('Team'), 'is selected in the drop-down menu for Team in the', strong('Calculate'), 'tab of this app'),
@@ -259,7 +275,9 @@ ui <- dashboardPage(
       ),
       tabItem(
         tabName = 'calculate',
-        titlePanel('Premier League Expected Goals (PLXG)'),
+        titlePanel(
+          h1('Premier League Expected Goals (PLXG)', align = 'center')
+        ),
         fluidRow(
           box(
             width = 4,
@@ -339,7 +357,9 @@ ui <- dashboardPage(
       ),
       tabItem(
         tabName = 'visualization',
-        titlePanel('Premier League Expected Goals (PLXG)'),
+        titlePanel(
+          h1('Premier League Expected Goals (PLXG)', align = 'center')
+        ),
         fluidRow(
           box(
             width = 3,
