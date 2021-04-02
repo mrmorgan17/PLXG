@@ -167,7 +167,7 @@ ui <- dashboardPage(
             width = 10,
             tabPanel(
               'Team',
-              p(strong('Team'), 'is selected in the drop-down menu in the', strong('Calculate'), 'tab of this app'),
+              p(strong('Team'), 'is selected in the drop-down menu in the', strong('Calculate'), 'tab of this application'),
               div(
                 p(em('Team = Manchester-City')),
                 style = 'padding-left: 2em;'
@@ -266,7 +266,8 @@ ui <- dashboardPage(
             title = 'Predict XG',
             width = 10,
             collapsible = TRUE,
-            p('Plug all values into the', strong('Calculate'), 'tab to get an updated XG prediction'),
+            p('Plug all values into the', strong('XG Variables'), 'section in the', strong('Calculate'), 'tab'),
+            p('Click the', strong('Calculate XG'), 'button to get an updated XG prediction'),
             p('For this match against Chelsea:'),
             div(
               p('Manchester City had an XG prediction of 2.95 goals'),
