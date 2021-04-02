@@ -148,10 +148,10 @@ ui <- dashboardPage(
             collapsible = TRUE,
             p('Starting from the', a('homepage', href = 'https://fbref.com/en')),
             div(
-              p('Go to the ', strong('Competitions'), 'tab and select ', strong('English Premier League')),
-              p('Then, select a team from the ', strong('League Table')),
-              p('From there, select the ', strong('Match Logs'), 'tab and then select the ', strong('Scores & Fixtures'), 'link for the', strong('Premier League')),
-              p('Finally, select the date of the match'),
+              p('Go to the', strong('Competitions'), 'tab and select ', strong('English Premier League')),
+              p('Select a team from the', strong('League Table')),
+              p('Hover over the', strong('Match Logs'), 'tab and then select the', strong('Shooting'), 'link under the', strong('Match Logs (Premier League)'), 'header'),
+              p('Select the', strong('Date'), 'of the match'),
               style = 'padding-left: 2em;'
             ),
             p('This is a', a('link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the specific FBref match page'),
@@ -247,6 +247,7 @@ ui <- dashboardPage(
               ),
               p(strong('Note:'), em('This table is NOT on the match page, it is in the'), strong('Match Logs (Premier League)'), em('tab for the specific team on FBref'), align = 'right'),
               p(em('The'), strong('Dist'), em('column is specifically in the'), strong('Shooting'), em('table within the'), strong('Match Logs (Premier League)'), em('tab'), align = 'right'),
+              p(em('Return to the page just before the'), strong('Date'), em('of the match was selected'), align = 'right'),
               p(em(a('Here', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'is the link to that table for Machester City\'s match against Chelsea on 1/3/2021'), align = 'right')
             ),
             tabPanel(
