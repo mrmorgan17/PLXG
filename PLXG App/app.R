@@ -245,7 +245,7 @@ ui <- dashboardPage(
                 p(em('Dist = 14.6')),
                 style = 'padding-left: 2em;'
               ),
-              p(strong('Note:'), em('This table is NOT on the match page, it is on the'), strong('Match Logs (Premier League)'), em('tab for a specific team on FBref'), align = 'right'),
+              p(strong('Note:'), em('This table is NOT on the match page, it is on the'), strong('Match Logs (Premier League)'), em('tab for the specific team on FBref'), align = 'right'),
               p(em('The'), strong('Dist'), em('column is specifically in the'), strong('Shooting'), em('table under the'), strong('Match Logs (Premier League)'), em('tab'), align = 'right'),
               p(em(a('Here', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'is the link to that table for Machester City'), align = 'right')
             ),
