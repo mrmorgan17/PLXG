@@ -137,7 +137,7 @@ ui <- dashboardPage(
             title = 'Goal',
             width = 10,
             collapsible = TRUE,
-            p(em('To walkthrough how to get an expected goals prediction for a specific Premier League match'))
+            p(em('To walkthrough how to get an expected goals prediction for a team from a specific Premier League match'))
           )
         ),
         fluidRow(
