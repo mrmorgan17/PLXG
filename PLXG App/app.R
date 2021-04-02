@@ -59,6 +59,7 @@ ui <- dashboardPage(
         titlePanel(
           h1('Premier League Expected Goals (PLXG)', align = 'center')
         ),
+        br(),
         fluidRow(
           column(1),
           box(
@@ -128,6 +129,7 @@ ui <- dashboardPage(
         titlePanel(
           h1('Premier League Expected Goals (PLXG)', align = 'center')
         ),
+        br(),
         fluidRow(
           column(1),
           box(
@@ -271,6 +273,7 @@ ui <- dashboardPage(
         titlePanel(
           h1('Premier League Expected Goals (PLXG)', align = 'center')
         ),
+        br(),
         fluidRow(
           column(
             width = 3,
