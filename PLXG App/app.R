@@ -368,20 +368,6 @@ ui <- dashboardPage(
             infoBoxOutput('LeagueAvgBox'),
             infoBoxOutput('DiffAvgBox')
           )
-        ),
-        fluidRow(
-          box(
-            title = 'Data Info',
-            collapsible = TRUE,
-            collapsed = TRUE,
-            p('Plots are created with Premier League data from the following campaigns:'),
-            div(
-              p('2017-2018'),
-              p('2018-2019'),
-              p('2019-2020'),
-              style = 'padding-left: 2em;'
-            )
-          )
         )
       )
     )  
