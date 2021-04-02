@@ -156,7 +156,7 @@ ui <- dashboardPage(
             ),
             p('This is a', a('link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the specific FBref match page'),
             div(
-              p(em('For this example, we will look at Manchester City\'s match against Chelsea on 1/3/2021')),
+              p(em('For this example, Manchester City\'s match against Chelsea on 1/3/2021 will be analyzed')),
               style = 'padding-left: 2em;'
             )
           ),
