@@ -523,7 +523,7 @@ server <- function(input, output, session) {
   
   output$AvgBox <- renderInfoBox({
     infoBox(
-      p(input$Variable, 'Average'), 
+      paste(input$Variable, 'Average'), 
       ifelse(input$PlotTeam == '' | input$Variable == '', 
              0, 
              round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), 
@@ -557,7 +557,7 @@ server <- function(input, output, session) {
   
   output$DiffAvgBox <- renderInfoBox({
     infoBox(
-      p(input$Variable, 'Difference'),
+      paste(input$Variable, 'Difference'),
       ifelse(input$PlotTeam == '' | input$Variable == '', 
              0, 
              round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), 
