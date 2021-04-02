@@ -149,7 +149,7 @@ ui <- dashboardPage(
             p('Starting from the', a('homepage', href = 'https://fbref.com/en')),
             div(
               p('Go to the', strong('Competitions'), 'tab and select ', strong('English Premier League')),
-              p('Select a team from the', strong('League Table')),
+              p('Select a', strong('Team'), 'from the', strong('League Table')),
               p('Hover over the', strong('Match Logs'), 'tab and then select the', strong('Shooting'), 'link under the', strong('Match Logs (Premier League)'), 'header'),
               p('Select the', strong('Date'), 'of the match'),
               style = 'padding-left: 2em;'
