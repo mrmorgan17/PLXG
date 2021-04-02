@@ -73,7 +73,7 @@ ui <- dashboardPage(
             title = 'Data Glossary',
             width = 10,
             collapsible = TRUE,
-            p('These are the variables of interest:'),
+            p('Variables of Interest:'),
             div(
               p(strong('Team:'), 'A Premier League team', em('(2017-2020)')),
               p(strong('SoT:'), 'Shots on target'),
