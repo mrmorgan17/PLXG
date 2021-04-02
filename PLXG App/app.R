@@ -288,17 +288,11 @@ ui <- dashboardPage(
                         selected = ''),
             conditionalPanel(
               condition = "input.Team != ''",
-              div(
-                br(),
-                p('The 10 variables to the right are used by the XGBoost model to predict XG'),
-                br(),
-                div(id = 'container', p('Shown are the average values of the 10 variables for'), strong(textOutput('TeamCopy2'))),
-                br(),
-                p('An XG prediction is instantly calculated given these averages'),
-                br(),
-                p('Other values for each of the 10 variables may be entered to calculate a new XG prediction'),
-                style = 'padding-left: 2em;'
-              )
+              p('The 10 variables to the right are used by the XGBoost model to predict XG'),
+              div(id = 'container', p('Shown are the average values of the 10 variables for'), strong(textOutput('TeamCopy2'))),
+              br(),
+              p('An XG prediction is instantly calculated given these averages'),
+              p('Other values for each of the 10 variables may be entered to calculate a new XG prediction')
             )
           ),
           conditionalPanel(
