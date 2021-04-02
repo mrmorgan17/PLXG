@@ -156,7 +156,7 @@ ui <- dashboardPage(
             ),
             p('This is a', a('link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the specific FBref match page'),
             div(
-              p(em('For this example, we will look at Manchester City in their match against Chelsea on January 3rd 2021')),
+              p(em('For this example, we will look at Manchester City in their match against Chelsea on 1/3/2021')),
               style = 'padding-left: 2em;'
             )
           ),
@@ -247,7 +247,7 @@ ui <- dashboardPage(
               ),
               p(strong('Note:'), em('This table is NOT on the match page, it is in the'), strong('Match Logs (Premier League)'), em('tab for the specific team on FBref'), align = 'right'),
               p(em('The'), strong('Dist'), em('column is specifically in the'), strong('Shooting'), em('table within the'), strong('Match Logs (Premier League)'), em('tab'), align = 'right'),
-              p(em(a('Here', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'is the link to that table for Machester City'), align = 'right')
+              p(em(a('Here', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'is the link to that table for Machester City\'s match against Chelsea on 1/3/2021'), align = 'right')
             ),
             tabPanel(
               'TklW',
