@@ -283,12 +283,13 @@ ui <- dashboardPage(
             dropdownButton(
               h4(strong('Team')),
               selectInput('Team', label = NULL,
-                          choices = c('', unique(PL_10$Team))),
+                          choices = c('', unique(Full_PL_10$Team))),
               status = 'primary',
               size = 'lg',
               icon = icon('shield-alt'),
               tooltip = tooltipOptions(placement = 'top', title = 'Select a team'),
-              right = TRUE
+              right = TRUE,
+              inputId = 'teamButton'
             ),
             br(),
             br(),
@@ -541,18 +542,33 @@ server <- function(input, output, session) {
   })
   
   output$DiffXGBox <- renderInfoBox({
+    
+    Avg_10 <- data.frame(
+      Team = input$Team, 
+      SoT = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SoT)), 
+      Opp_Saves = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves)), 
+      PKatt = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(PKatt)), 
+      SCA_Total = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total)), 
+      Short_Cmp = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp)), 
+      TB = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TB)), 
+      Dead = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dead)), 
+      Clr = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Clr)), 
+      Dist = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dist)), 
+      TklW = mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TklW))
+    )
+    
     infoBox(
       'XG Difference', 
-      ifelse(class(try(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error',
+      ifelse(class(try(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())) - predict(PLXG.Model, Avg_10), digits = 2), silent = TRUE)) == 'try-error',
              0,
-             round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())) - predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2)),
+             round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())) - predict(PLXG.Model, Avg_10), digits = 2)),
       subtitle = em('Calculated XG - Average XG'),
       icon = icon('futbol'),
-      color = if (class(try(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2), silent = TRUE)) == 'try-error') {
+      color = if (class(try(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())) - predict(PLXG.Model, Avg_10), digits = 2), silent = TRUE)) == 'try-error') {
         'black'
-      } else if (round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2) < 0) {
+      } else if (round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())) - predict(PLXG.Model, Avg_10), digits = 2) < 0) {
         'red'
-      } else if (round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(predict(PLXG.Model, PL_10 %>% filter(Team == input$Team)), digits = 2) > 0) {
+      } else if (round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())) - predict(PLXG.Model, Avg_10), digits = 2) > 0) {
         'green'
       } else {
         'black'
