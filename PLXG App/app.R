@@ -275,33 +275,68 @@ ui <- dashboardPage(
           h1('Premier League Expected Goals (PLXG)', align = 'center')
         ),
         fluidRow(
-          box(
-            width = 4,
-            selectInput('Team', 'Team:',
-                        choices = c('', unique(PL_10$Team)),
-                        selected = ''),
+          column(
+            width = 3,
+            offset = 1,     
+            br(),
+            br(),     
+            dropdownButton(
+              h4(strong('Team:')),
+              selectInput('Team', label = NULL,
+                          choices = c('', unique(PL_10$Team))),
+              status = 'primary',
+              size = 'lg',
+              icon = icon('shield-alt'),
+              tooltip = tooltipOptions(placement = 'top', title = 'Select a team'),
+              right = TRUE
+            ),
+            br(),
+            br(),
+            br(),
             conditionalPanel(
               condition = "input.Team != ''",
-              p('The 10 variables to the right are used by the XGBoost model to predict XG'),
-              div(id = 'container', p('Shown are the average values of the 10 variables for'), strong(textOutput('TeamCopy2'))),
-              br(),
-              p('An XG prediction is instantly calculated given these averages'),
-              p('Other values for each of the 10 variables may be entered to calculate a new XG prediction')
+              dropdownButton(
+                div(id = 'container', p('An XG prediction has been calculated for'), strong(textOutput('Team'))),
+                status = 'primary',
+                size = 'lg',
+                icon = icon('calculator'),
+                tooltip = tooltipOptions(placement = 'top', title = 'Calculate XG'),
+                right = TRUE,
+                inputId = 'calculateButton'
+              )
+            ),
+            br(),
+            br(),
+            br(),
+            conditionalPanel(
+              condition = "input.Team != ''",
+              dropdownButton(
+                div(id = 'container', p('The values of the variables have been reset for'), strong(textOutput('TeamCopy'))),
+                status = 'primary',
+                size = 'lg',
+                icon = icon('history'),
+                tooltip = tooltipOptions(placement = 'top', title = 'Reset'),
+                right = TRUE,
+                inputId = 'resetButton'
+              )
             )
           ),
           conditionalPanel(
             condition = "input.Team != ''",
             box(
-              title = 'XG Variables',
+              title = strong('XG Variables'),
               width = 4,
-              column(6,
+              background = 'light-blue',
+              column(
+                width = 6,
                 numericInput('SoT', 'SoT:', value = 0, min = 0, max = 100, step = .01),
                 numericInput('Opp_Saves', 'Opp_Saves:',  value = 0, min = 0, max = 100, step = .01),
                 numericInput('PKatt', 'PKatt:', value = 0, min = 0, max = 100, step = .01),
                 numericInput('SCA_Total', 'SCA:', value = 0, min = 0, max = 100, step = .01),
                 numericInput('Short_Cmp', 'Short_Cmp:', value = 0, min = 0, max = 1000, step = .01)
               ),
-              column(6,
+              column(
+                width = 6,
                 numericInput('TB', 'TB:', value = 0, min = 0, max = 100, step = .01),
                 numericInput('Dead', 'Dead:', value = 0, min = 0, max = 100, step = .01),
                 numericInput('Clr', 'Clr:', value = 0, min = 0, max = 100, step = .01),
@@ -310,20 +345,25 @@ ui <- dashboardPage(
               )
             )
           ),
-          conditionalPanel(
-            condition = "input.Team != ''",
-            box(
-              width = 4,
-              align = 'center',
-              div(id = 'container', p('Click the button to calculate the a new XG prediction for'), strong(textOutput('Team'))),
-              br(),
-              actionBttn(inputId = 'calculateButton', label = 'Calculate XG', color = 'default', style = 'fill'),
-              br(),
-              br(),
-              div(id = 'container', p('Click the button to reset variables for'), strong(textOutput('TeamCopy')), p('back to their initial values')),
-              br(),
-              actionBttn(inputId = 'resetButton', label = 'Reset', color = 'default', style = 'fill'),
-              br()
+          column(
+            width = 3,
+            offset = 1,
+            br(),
+            br(),
+            conditionalPanel(
+              condition = "input.Team != ''",
+              dropdownButton(
+                h4(strong('Info')),
+                p('The 10 variables to the left are used by the XGBoost model to predict XG'),
+                div(id = 'container', p('Shown are the average values of the 10 variables for'), strong(textOutput('TeamCopy2'))),
+                br(),
+                p('An XG prediction is instantly calculated given these averages'),
+                p('Other values for each of the 10 variables may be entered to calculate a new XG prediction'),
+                status = 'primary',
+                size = 'lg',
+                icon = icon('info'),
+                tooltip = tooltipOptions(placement = 'top', title = 'Info')
+              )
             )
           )
         ),
@@ -343,35 +383,66 @@ ui <- dashboardPage(
           h1('Premier League Expected Goals (PLXG)', align = 'center')
         ),
         fluidRow(
-          box(
-            width = 3,
-            selectInput('PlotTeam', 'Team:',
-                        choices = c('', unique(sort(Full_PL_10$Team)))),
+          column(
+            width = 2,
+            offset = 1,
+            br(),
+            br(),
+            br(),
+            dropdownButton(
+              h4(strong('Team:')),
+              selectInput('PlotTeam', label = NULL, 
+                          choices = c('', unique(sort(Full_PL_10$Team)))),
+              status = 'primary',
+              size = 'lg',
+              icon = icon('shield-alt'),
+              tooltip = tooltipOptions(placement = 'top', title = 'Select a team'),
+              right = TRUE
+            ),
+            br(),
+            br(),
+            br(),
             conditionalPanel(
               condition = "input.PlotTeam != ''",
-              selectInput('Variable', 'Variable:',
-                          choices = c('', 'Goals', 'SoT', 'Opp_Saves', 'PKatt', 'SCA_Total', 'Short_Cmp', 'TB', 'Dead', 'Clr', 'Dist', 'TklW')),
+              dropdownButton(
+                h4(strong('Variable:')),
+                selectInput('Variable', label = NULL,
+                            choices = c('', 'Goals', 'SoT', 'Opp_Saves', 'PKatt', 'SCA_Total', 'Short_Cmp', 'TB', 'Dead', 'Clr', 'Dist', 'TklW')),
+                status = 'primary',
+                size = 'lg',
+                icon = icon('sitemap'),
+                tooltip = tooltipOptions(placement = 'top', title = 'Select a variable'),
+                right = TRUE
+              )
             ),
+            br(),
+            br(),
+            br(),
             conditionalPanel(
               condition = "input.PlotTeam != '' & input.Variable != ''",
-              sliderInput('nBins', 'Number of Bins', value = 5, min = 5, max = 30, step = 5, ticks = FALSE)
+              dropdownButton(
+                h4(strong('Bins:')),
+                sliderInput('nBins', label = NULL, value = 5, min = 5, max = 30, step = 5, ticks = FALSE),
+                status = 'primary',
+                size = 'lg',
+                icon = icon('chart-bar'),
+                tooltip = tooltipOptions(placement = 'top', title = 'Adjust the number of bins'),
+                right = TRUE
+              )
             )
-            # conditionalPanel(
-            #   condition = "input.PlotTeam != '' & input.Variable != '' & input.nBins >= 5",
-            #   actionBttn(inputId = 'plotButton', label = 'Plot', color = 'default', style = 'fill')
-            # )
-            # input.plotButton != 0
           ),
+          br(),
           conditionalPanel(
             condition = "input.PlotTeam != '' & input.Variable != ''",
             box(
-              title = div(id = 'container', p('Histogram & Density Plot of'), strong(textOutput('Variable')), p('for'), strong(textOutput('PlotTeam'))),
+              title = div(id = 'container', p('Histogram and Density Plot of'), strong(textOutput('Variable')), p('for'), strong(textOutput('PlotTeam'))),
               background = 'light-blue',
               width = 9,
               plotOutput('dataPlot')
             )
           )
         ),
+        br(),
         br(),
         fluidRow(
           conditionalPanel(
