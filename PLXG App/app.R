@@ -427,21 +427,10 @@ ui <- dashboardPage(
 # Define server
 server <- function(input, output, session) {
   
-  output$Team <- renderText({
-    input$Team
-  })
-  
-  output$TeamCopy <- renderText({
-    input$Team
-  })
-  
-  output$TeamCopy2 <- renderText({
-    input$Team
-  })
-  
-  output$TeamCopy3 <- renderText({
-    input$Team
-  })
+  output$Team <- renderText(input$Team)
+  output$TeamCopy <- renderText(input$Team)
+  output$TeamCopy2 <- renderText(input$Team)
+  output$TeamCopy3 <- renderText(input$Team)
   
   observeEvent(input$Team, {
     updateNumericInput(session, 'SoT', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(SoT), digits = 2), min = 0, max = 100)
