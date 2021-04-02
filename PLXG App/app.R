@@ -484,7 +484,7 @@ server <- function(input, output, session) {
       stat_function(fun = dnorm,
                     args = list(mean = mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)),
                                 sd = sd(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable))),
-                    col = '#f04848',
+                    col = '#317196',
                     size = 2) +
       xlab(input$Variable) +
       ylab('Density')
