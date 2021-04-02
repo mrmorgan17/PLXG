@@ -296,25 +296,27 @@ ui <- dashboardPage(
             )
           ),
           box(
-            width = 2,
-            conditionalPanel(
-              condition = "input.Team != ''",
-              numericInput('SoT', 'SoT:', value = 0, min = 0, max = 100, step = .01),
-              numericInput('Opp_Saves', 'Opp_Saves:',  value = 0, min = 0, max = 100, step = .01),
-              numericInput('PKatt', 'PKatt:', value = 0, min = 0, max = 100, step = .01),
-              numericInput('SCA_Total', 'SCA:', value = 0, min = 0, max = 100, step = .01),
-              numericInput('Short_Cmp', 'Short_Cmp:', value = 0, min = 0, max = 1000, step = .01)
-            )
-          ),
-          box(
-            width = 2,
-            conditionalPanel(
-              condition = "input.Team != ''",
-              numericInput('TB', 'TB:', value = 0, min = 0, max = 100, step = .01),
-              numericInput('Dead', 'Dead:', value = 0, min = 0, max = 100, step = .01),
-              numericInput('Clr', 'Clr:', value = 0, min = 0, max = 100, step = .01),
-              numericInput('Dist', 'Dist:', value = 0, min = 0, max = 100, step = .01),
-              numericInput('TklW', 'TklW:', value = 0, min = 0,  max = 100, step = .01)
+            title = 'XG Variables',
+            width = 4,
+            column(6,
+              conditionalPanel(
+                condition = "input.Team != ''",
+                numericInput('SoT', 'SoT:', value = 0, min = 0, max = 100, step = .01),
+                numericInput('Opp_Saves', 'Opp_Saves:',  value = 0, min = 0, max = 100, step = .01),
+                numericInput('PKatt', 'PKatt:', value = 0, min = 0, max = 100, step = .01),
+                numericInput('SCA_Total', 'SCA:', value = 0, min = 0, max = 100, step = .01),
+                numericInput('Short_Cmp', 'Short_Cmp:', value = 0, min = 0, max = 1000, step = .01)
+              )
+            ),
+            column(6,
+              conditionalPanel(
+                condition = "input.Team != ''",
+                numericInput('TB', 'TB:', value = 0, min = 0, max = 100, step = .01),
+                numericInput('Dead', 'Dead:', value = 0, min = 0, max = 100, step = .01),
+                numericInput('Clr', 'Clr:', value = 0, min = 0, max = 100, step = .01),
+                numericInput('Dist', 'Dist:', value = 0, min = 0, max = 100, step = .01),
+                numericInput('TklW', 'TklW:', value = 0, min = 0,  max = 100, step = .01)
+              )
             )
           ),
           box(
