@@ -286,31 +286,31 @@ ui <- dashboardPage(
             selectInput('Team', 'Team:',
                         choices = c('', unique(PL_10$Team)),
                         selected = ''),
-            p('When a team is selected:'),
-            div(
-              p('10 variables will appear which are the ones used by the model to predict XG'),
-              p('Initially shown are the average values of the 10 variables for the selected team'),
-              p('An XG prediction is instantly calculated given the average values of the 10 variables'),
-              p('Other values for each of the 10 variables may be entered to calculate a new XG prediction'),
-              style = 'padding-left: 2em;'
+            conditionalPanel(
+              condition = "input.Team != ''",
+              div(
+                p('The 10 variables to the right are used by the XGBoost model to predict XG'),
+                div(id = 'container', p('Shown are the average values of the 10 variables for'), strong(textOutput('TeamCopy2'))),
+                br(),
+                p('An XG prediction is instantly calculated given these averages'),
+                p('Other values for each of the 10 variables may be entered to calculate a new XG prediction'),
+                style = 'padding-left: 2em;'
+              )
             )
           ),
-          box(
-            title = 'XG Variables',
-            width = 4,
-            column(6,
-              conditionalPanel(
-                condition = "input.Team != ''",
+          conditionalPanel(
+            condition = "input.Team != ''",
+            box(
+              title = 'XG Variables',
+              width = 4,
+              column(6,
                 numericInput('SoT', 'SoT:', value = 0, min = 0, max = 100, step = .01),
                 numericInput('Opp_Saves', 'Opp_Saves:',  value = 0, min = 0, max = 100, step = .01),
                 numericInput('PKatt', 'PKatt:', value = 0, min = 0, max = 100, step = .01),
                 numericInput('SCA_Total', 'SCA:', value = 0, min = 0, max = 100, step = .01),
                 numericInput('Short_Cmp', 'Short_Cmp:', value = 0, min = 0, max = 1000, step = .01)
-              )
-            ),
-            column(6,
-              conditionalPanel(
-                condition = "input.Team != ''",
+              ),
+              column(6,
                 numericInput('TB', 'TB:', value = 0, min = 0, max = 100, step = .01),
                 numericInput('Dead', 'Dead:', value = 0, min = 0, max = 100, step = .01),
                 numericInput('Clr', 'Clr:', value = 0, min = 0, max = 100, step = .01),
@@ -319,15 +319,19 @@ ui <- dashboardPage(
               )
             )
           ),
-          box(
-            width = 4,
-            align = 'center',
-            div(id = 'container', p('Click the button to calculate the a new XG prediction for'), strong(textOutput('Team'))),
-            actionBttn(inputId = 'calculateButton', label = 'Calculate XG', color = 'default', style = 'fill'),
-            br(),
-            br(),
-            div(id = 'container', p('Click the button to reset variables for'), strong(textOutput('TeamCopy')), p('back to their initial values')),
-            actionBttn(inputId = 'resetButton', label = 'Reset', color = 'default', style = 'fill'))
+          conditionalPanel(
+            condition = "input.Team != ''",
+            box(
+              width = 4,
+              align = 'center',
+              div(id = 'container', p('Click the button to calculate the a new XG prediction for'), strong(textOutput('Team'))),
+              actionBttn(inputId = 'calculateButton', label = 'Calculate XG', color = 'default', style = 'fill'),
+              br(),
+              br(),
+              div(id = 'container', p('Click the button to reset variables for'), strong(textOutput('TeamCopy')), p('back to their initial values')),
+              actionBttn(inputId = 'resetButton', label = 'Reset', color = 'default', style = 'fill')
+            )
+          )
         ),
         br(),
         fluidRow(
@@ -349,15 +353,24 @@ ui <- dashboardPage(
             width = 3,
             selectInput('PlotTeam', 'Team:',
                         choices = c('', unique(sort(Full_PL_10$Team)))),
-            br(),
-            selectInput('Variable', 'Variable:',
-                        choices = c('', 'Goals', 'SoT', 'Opp_Saves', 'PKatt', 'SCA_Total', 'Short_Cmp', 'TB', 'Dead', 'Clr', 'Dist', 'TklW')),
-            br(),
-            sliderInput('nBins', 'Number of Bins', value = 5, min = 0, max = 50, step = 5, ticks = FALSE),
-            br()
+            conditionalPanel(
+              condition = "input.PlotTeam != ''",
+              selectInput('Variable', 'Variable:',
+                          choices = c('', 'Goals', 'SoT', 'Opp_Saves', 'PKatt', 'SCA_Total', 'Short_Cmp', 'TB', 'Dead', 'Clr', 'Dist', 'TklW')),
+            ),
+            conditionalPanel(
+              condition = "input.PlotTeam != '' & input.Variable != ''",
+              sliderInput('nBins', 'Number of Bins', value = 5, min = 0, max = 50, step = 5, ticks = FALSE)
+            )
           ),
-          column(9,
-                 plotOutput('dataPlot')
+          conditionalPanel(
+            condition = "input.PlotTeam != '' & input.Variable != ''",
+            box(
+              title = div(id = 'container', p('Histogram & Density Plot of'), strong(textOutput('Variable')), p('for'), strong(textOutput('PlotTeam'))),
+              background = 'light-blue',
+              width = 9,
+              plotOutput('dataPlot')
+            )
           )
         ),
         br(),
