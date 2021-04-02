@@ -99,9 +99,9 @@ ui <- dashboardPage(
             collapsed = TRUE,
             p('Match data for each team was web scraped for the following Premier League campaigns:'),
             div(
-              p('2017-2018'),
-              p('2018-2019'),
-              p('2019-2020'),
+              p(em('2017-2018')),
+              p(em('2018-2019')),
+              p(em('2019-2020')),
               style = 'padding-left: 2em;'
             ),
             p('Code for how web scraping was done is available ', a('here', href = 'https://github.com/mrmorgan17/PLXG/blob/main/FBref_scraper.R'), 'on my GitHub profile'),
@@ -119,10 +119,10 @@ ui <- dashboardPage(
             p('Models were trained to minimize the Root Mean Square Error', strong('RMSE'), 'which in this case is:'),
             withMathJax(),
             p('$$\\mathrm{RMSE}=\\sqrt{\\frac{\\sum_{i=1}^{N}\\left(\\mathrm{Actual\\,Goals}_{i} - \\mathrm{Predicted\\,Goals}_{i}\\right)^{2}}N}$$'),
-            p('The best model', em('and the one used in this app'), 'was an Extreme Gradient Boosted', strong('XGBoost'), 'model. This model had RMSE values of approximately .3'),
+            p('The best model', em('and the one used in this application'), 'was an Extreme Gradient Boosted', strong('XGBoost'), 'model. This model had RMSE values of approximately', strong('.3')),
             p('The specifics of the XGBoost model along with the other models created are in this', a('R script', href = 'https://github.com/mrmorgan17/PLXG/blob/main/PLXG_modeling.R'), 'on my GitHub profile'),
             p('The best XGBoost model was built using the 10 most important variables'), 
-            p('These 10 most important variables were identified from an XGBoost model where all possible variables were used')
+            p('These 10 variables were identified from an XGBoost model where all possible variables were used')
           )
         )
       ),
