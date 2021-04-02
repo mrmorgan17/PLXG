@@ -433,17 +433,19 @@ server <- function(input, output, session) {
   })
   
   selectedValues <- eventReactive(input$updateButton, {
-    data.frame(Team = input$Team, 
-               SoT = input$SoT, 
-               Opp_Saves = input$Opp_Saves, 
-               PKatt = input$PKatt, 
-               SCA_Total = input$SCA_Total, 
-               Short_Cmp = input$Short_Cmp, 
-               TB = input$TB, 
-               Dead = input$Dead, 
-               Clr = input$Clr, 
-               Dist = input$Dist, 
-               TklW = input$TklW) 
+    data.frame(
+      Team = input$Team, 
+      SoT = input$SoT, 
+      Opp_Saves = input$Opp_Saves, 
+      PKatt = input$PKatt, 
+      SCA_Total = input$SCA_Total, 
+      Short_Cmp = input$Short_Cmp, 
+      TB = input$TB, 
+      Dead = input$Dead, 
+      Clr = input$Clr, 
+      Dist = input$Dist, 
+      TklW = input$TklW
+    ) 
   })
   
   output$UpdatedXGBox <- renderInfoBox({
