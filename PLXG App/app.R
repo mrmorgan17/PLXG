@@ -1,4 +1,5 @@
 library(shiny)
+library(shinycssloaders)
 library(shinyWidgets)
 library(shinydashboard)
 library(ggplot2)
@@ -33,7 +34,7 @@ ui <- dashboardPage(
         message = div(
           helpText('caret, caTools, ggplot2, rvest,'),
           helpText('shiny, shinydashboard, shinyWidgets,'),
-          helpText('tidyverse, vroom')
+          helpText('shinycssloaders, tidyverse, vroom')
         ), 
         icon = icon('box')
       )
@@ -440,7 +441,7 @@ ui <- dashboardPage(
               title = div(id = 'container', p('Histogram and Density Plot of'), strong(textOutput('Variable')), p('for'), strong(textOutput('PlotTeam'))),
               background = 'light-blue',
               width = 9,
-              plotOutput('dataPlot')
+              plotOutput('dataPlot') %>% withSpinner(color = '#a9daff')
             )
           )
         ),
@@ -560,6 +561,7 @@ server <- function(input, output, session) {
   })
   
   output$dataPlot <- renderPlot({
+    Sys.sleep(.5)
     ggplot(data.frame(x = Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), aes(x)) + 
       geom_histogram(aes(y = ..density..), 
                      bins = input$nBins,
