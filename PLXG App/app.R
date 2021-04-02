@@ -146,7 +146,7 @@ ui <- dashboardPage(
             title = 'How to Find Specific Match Data on FBref',
             width = 10,
             collapsible = TRUE,
-            p('Start on the', a('homepage', href = 'https://fbref.com/en')),
+            p('Start on the', a('FBref homepage', href = 'https://fbref.com/en')),
             div(
               p('Find the', strong('Competitions'), 'tab and select ', strong('English Premier League')),
               p('Select a', strong('Team'), 'from the', strong('League Table')),
