@@ -311,7 +311,7 @@ ui <- dashboardPage(
             conditionalPanel(
               condition = "input.Team != ''",
               dropdownButton(
-                div(id = 'container', p('The values of the variables have been reset for'), strong(textOutput('TeamCopy'))),
+                div(id = 'container', p('The values of the'), strong('XG Variables'), p('have been reset for'), strong(textOutput('TeamCopy'))),
                 status = 'primary',
                 size = 'lg',
                 icon = icon('history'),
@@ -354,11 +354,13 @@ ui <- dashboardPage(
               condition = "input.Team != ''",
               dropdownButton(
                 h4(strong('Info')),
-                p('The 10 variables to the left are used by the XGBoost model to predict XG'),
-                div(id = 'container', p('Shown are the average values of the 10 variables for'), strong(textOutput('TeamCopy2'))),
+                div(id = 'container', p('The 10'), strong('XG Variables'), p('to the left are used by the XGBoost model to predict XG')),
                 br(),
-                p('An XG prediction is instantly calculated given these averages'),
-                p('Other values for each of the 10 variables may be entered to calculate a new XG prediction'),
+                div(id = 'container', p('Shown are the average values of the'), strong('XG Variables'), p('for'), strong(textOutput('TeamCopy2'))),
+                br(),
+                div(id = 'container', p('An XG prediction is instantly calculated given the averages values of the'), strong('XG Variables')),
+                br(),
+                div(id = 'container', p('Other values for the'), strong('XG Variables'), p('may be entered to calculate new XG predictions')),
                 status = 'primary',
                 size = 'lg',
                 icon = icon('info'),
