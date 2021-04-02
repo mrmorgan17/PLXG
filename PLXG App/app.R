@@ -133,7 +133,7 @@ ui <- dashboardPage(
             title = 'Goal',
             width = 10,
             collapsible = TRUE,
-            p(em('To walkthrough how to get an XG prediction for a team from a specific Premier League match'))
+            p(em('To walkthrough how to get a team\'s predicted XG for a ceratin match'))
           )
         ),
         fluidRow(
@@ -151,7 +151,7 @@ ui <- dashboardPage(
               style = 'padding-left: 2em;'
             ),
             p(em('For this example, Manchester City\'s match against Chelsea on 1/3/2021 will be analyzed')),
-            p(em(a('Link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the specific FBref match page')),
+            p(em(a('Link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the FBref match page')),
           ),
         ),
         fluidRow(
