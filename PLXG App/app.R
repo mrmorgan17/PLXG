@@ -361,11 +361,12 @@ ui <- dashboardPage(
             conditionalPanel(
               condition = "input.PlotTeam != '' & input.Variable != ''",
               sliderInput('nBins', 'Number of Bins', value = 5, min = 5, max = 30, step = 5, ticks = FALSE)
-            ),
+            )
             # conditionalPanel(
             #   condition = "input.PlotTeam != '' & input.Variable != '' & input.nBins >= 5",
             #   actionBttn(inputId = 'plotButton', label = 'Plot', color = 'default', style = 'fill')
             # )
+            # input.plotButton != 0
           ),
           conditionalPanel(
             condition = "input.PlotTeam != '' & input.Variable != ''",
@@ -510,6 +511,14 @@ server <- function(input, output, session) {
   
   output$PlotTeam <- renderText(input$PlotTeam)
   output$Variable <- renderText(input$Variable)
+  
+  state <- reactiveValues()
+  
+  observe({
+    state$x <- input$nBins
+  })
+  
+  output$pastnBins <- renderText(state$x)
   
   output$AvgBox <- renderInfoBox({
     infoBox(
