@@ -286,9 +286,9 @@ ui <- dashboardPage(
                         selected = ''),
             p('When a team is selected:'),
             div(
-              p('The 10 variables that appear are the ones used by the model to predict XG'),
+              p('10 variables will appear which are the ones used by the model to predict XG'),
               p('Initially shown are the average values of the 10 variables for the selected team'),
-              p('An average XG prediction is pre-calculated'),
+              p('An XG prediction is instantly calculated given the average values of the 10 variables'),
               p('Other values for each variable may be entered to calculate a new XG prediction'),
               style = 'padding-left: 2em;'
             )
@@ -340,12 +340,12 @@ ui <- dashboardPage(
             box(
               width = 4,
               align = 'center', 
-              p('Average Expected Goals prediction for the selected team')
+              div(id = 'container', p('Average Expected Goals prediction for'), strong(textOutput('TeamCopy2')))
             ),
             box(
               width = 4,
               align = 'center', 
-              p('Calculated Expected Goals prediction for the selected team')
+              div(id = 'container', p('Calculated Expected Goals prediction for'), strong(textOutput('TeamCopy3')))
             ),
             box(
               width = 4,
@@ -432,6 +432,14 @@ server <- function(input, output, session) {
   })
   
   output$TeamCopy <- renderText({
+    input$Team
+  })
+  
+  output$TeamCopy2 <- renderText({
+    input$Team
+  })
+  
+  output$TeamCopy3 <- renderText({
     input$Team
   })
   
