@@ -79,12 +79,12 @@ ui <- dashboardPage(
               p(strong('SoT:'), 'Shots on target'),
               p(strong('Opp_Saves:'), em('Opposing team'), 'goalkeeper saves'),
               p(strong('PKatt:'), 'Penalty kicks attempted'),
-              p(strong('SCA:'), 'The two offensive actions directly leading to a shot, such as passes, dribbles and drawing fouls.'),
+              p(strong('SCA:'), 'Live-ball passes, dead-ball passes, successful dribbles, fouls drawn, and defensive actions that lead to a shot attempt'),
               p(strong('Short_Cmp:'), 'Passes completed between 5 and 15 yards'),
               p(strong('TB:'), 'Completed passes sent between back defenders into open space'),
-              p(strong('Dead:'), 'Dead-ball passes (Includes free kicks, corner kicks, kick offs, throw-ins and goal kicks)'),
+              p(strong('Dead:'), 'Dead-ball passes', em('(Includes free kicks, corner kicks, kick offs, throw-ins and goal kicks)')),
               p(strong('Clr:'), em('Opposing team'), 'clearances'),
-              p(strong('Dist:'), 'Average distance, in yards, from goal of all shots taken (Does not include penalty kicks)'),
+              p(strong('Dist:'), 'Average distance, in yards, from goal of all shots taken', em('(Does not include penalty kicks)')),
               p(strong('TklW:'), 'Tackles in which the', em('opposing team'), 'won possession of the ball'),
               style = 'padding-left: 2em;'
             )
