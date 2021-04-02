@@ -318,11 +318,11 @@ ui <- dashboardPage(
           box(
             width = 4,
             align = 'center',
-            p('Click the button to calculate the team\'s XG prediction'),
+            div(id = 'container', p('Click the button to calculate the a new XG prediction for'), strong(textOutput('Team'))),
             actionBttn(inputId = 'calculateButton', label = 'Calculate XG', color = 'default', style = 'fill'),
             br(),
             br(),
-            p('Click the button to reset the variables of the selected team back to their initial average values'),
+            div(id = 'container', p('Click the button to reset variables for'), strong(textOutput('TeamCopy')), p('back to their initial values')),
             actionBttn(inputId = 'resetButton', label = 'Reset', color = 'default', style = 'fill'))
         ),
         br(),
@@ -426,6 +426,14 @@ ui <- dashboardPage(
 
 # Define server
 server <- function(input, output, session) {
+  
+  output$Team <- renderText({
+    input$Team
+  })
+  
+  output$TeamCopy <- renderText({
+    input$Team
+  })
   
   observeEvent(input$Team, {
     updateNumericInput(session, 'SoT', value = round(PL_10 %>% filter(Team == input$Team) %>% pull(SoT), digits = 2), min = 0, max = 100)
