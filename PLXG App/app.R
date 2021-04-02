@@ -119,8 +119,8 @@ ui <- dashboardPage(
             p('Models were trained to minimize the Root Mean Square Error', strong('RMSE'), 'which in this case is:'),
             withMathJax(),
             p('$$\\mathrm{RMSE}=\\sqrt{\\frac{\\sum_{i=1}^{N}\\left(\\mathrm{Actual\\,Goals}_{i} - \\mathrm{Predicted\\,Goals}_{i}\\right)^{2}}N}$$'),
-            p('The best model', em('and the one used in this app'), 'was an Extreme Gradient Boosted ', strong('XGBoost'), 'model. This model had RMSE values of approximately .3'),
-            p('The specifics of the XGBoost model along with the other models created are in this ', a('R script', href = 'https://github.com/mrmorgan17/PLXG/blob/main/PLXG_modeling.R'), 'on my GitHub profile'),
+            p('The best model', em('and the one used in this app'), 'was an Extreme Gradient Boosted', strong('XGBoost'), 'model. This model had RMSE values of approximately .3'),
+            p('The specifics of the XGBoost model along with the other models created are in this', a('R script', href = 'https://github.com/mrmorgan17/PLXG/blob/main/PLXG_modeling.R'), 'on my GitHub profile'),
             p('The best XGBoost model was built using the 10 most important variables'), 
             p('These 10 most important variables were identified from an XGBoost model where all possible variables were used')
           )
@@ -137,7 +137,7 @@ ui <- dashboardPage(
             title = 'Goal',
             width = 10,
             collapsible = TRUE,
-            p(em('To walkthrough how to get an expected goals prediction for a specific Premier League match.'))
+            p(em('To walkthrough how to get an expected goals prediction for a specific Premier League match'))
           )
         ),
         fluidRow(
@@ -148,10 +148,10 @@ ui <- dashboardPage(
             collapsible = TRUE,
             p('Starting from the', a('homepage', href = 'https://fbref.com/en')),
             div(
-              p('Go to the ', strong('Competitions'), 'tab and select ', strong('English Premier League.')),
+              p('Go to the ', strong('Competitions'), 'tab and select ', strong('English Premier League')),
               p('Then, select a team from the ', strong('League Table')),
               p('From there, select the ', strong('Match Logs'), 'tab and then select the ', strong('Scores & Fixtures'), 'link for the', strong('Premier League')),
-              p('Finally, select the date of the match you are interested in'),
+              p('Finally, select the date of the match'),
               style = 'padding-left: 2em;'
             ),
             p('This is a', a('link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the specific FBref match page'),
@@ -376,7 +376,7 @@ ui <- dashboardPage(
               p('2017-2018'),
               p('2018-2019'),
               p('2019-2020'),
-              style = 'text-align: left;'
+              style = 'padding-left: 2em;'
             )
           )
         )
