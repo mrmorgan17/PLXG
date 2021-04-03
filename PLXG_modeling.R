@@ -10,7 +10,15 @@ pl_team_data <- vroom('Pl_team_match_data.csv') %>% mutate(Dist = ifelse(is.na(D
 # For Visualization tab of app.R
 Full_PL_10 <- pl_team_data %>% select(Goals, Team, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW)
 
+PLXG.Model <- readRDS('/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/PLXGModel.RData')
+
+Full_PL_10 <- Full_PL_10 %>% mutate(XG = round(predict(PLXG.Model, Full_PL_10 %>% select(-Goals)), digits = 2))
+
+Full_PL_10 <- merge(Full_PL_10, Avg_Dat_10 %>% select(Team, XG), by = 'Team')
+
 write.csv(Full_PL_10, '/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/Full_PL_10.csv', row.names = FALSE)
+
+
 
 # Dist = 2 NA's
 # Opp_GK_AvgLen = 37 NA's
@@ -203,7 +211,9 @@ Avg_Dat <- do.call(rbind, Avg_Dat)
 Avg_Dat <- Avg_Dat[,c(98, 1:97)]
 
 # Select the Team and the 10 most important variables
-Avg_Dat_10 <- Avg_Dat %>% select(Team, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW)
+Avg_Dat_10 <- Avg_Dat %>% select(Team, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW) 
+Avg_Dat_10$XG <- round(predict(PLXG.Model, Avg_Dat_10), digits = 2)
 
 # Writing out a .csv of each team's averages for the 10 most important variables for xgbTree3.model to be used in the Shint App
 write.csv(Avg_Dat_10, '/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/PL_10.csv', row.names = FALSE)
+
