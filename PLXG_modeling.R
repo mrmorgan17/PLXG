@@ -14,7 +14,7 @@ PLXG.Model <- readRDS('/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/PL
 
 Full_PL_10 <- Full_PL_10 %>% mutate(XG = round(predict(PLXG.Model, Full_PL_10 %>% select(-Goals)), digits = 2))
 
-Full_PL_10 <- merge(Full_PL_10, Avg_Dat_10 %>% select(Team, XG), by = 'Team')
+# Full_PL_10 <- merge(Full_PL_10, Avg_Dat_10 %>% select(Team, XG), by = 'Team')
 
 write.csv(Full_PL_10, '/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/Full_PL_10.csv', row.names = FALSE)
 
