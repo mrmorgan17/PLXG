@@ -63,7 +63,7 @@ ui <- dashboardPage(
         fluidRow(
           column(1),
           box(
-            title = 'Goal',
+            title = p(icon('bullseye'), 'Goal'),
             width = 10,
             collapsible = TRUE,
             p(em('To predict Expected Goals (XG) per match for Premier League teams'))
@@ -72,7 +72,7 @@ ui <- dashboardPage(
         fluidRow(
           column(1),
           box(
-            title = 'Data Glossary',
+            title = p(icon('book'), 'Data Glossary'),
             width = 10,
             collapsible = TRUE,
             p(strong('Team:'), 'A Premier League team', em('(2017-2020)')),
@@ -91,7 +91,7 @@ ui <- dashboardPage(
         fluidRow(
           column(1),
           box(
-            title = 'Web Scraping',
+            title = p(icon('laptop-code'), 'Web Scraping'),
             width = 10,
             collapsible = TRUE,
             collapsed = TRUE,
@@ -109,7 +109,7 @@ ui <- dashboardPage(
         fluidRow(
           column(1),
           box(
-            title = 'Modeling',
+            title = p(icon('chart-line'), 'Modeling'),
             width = 10,
             collapsible = TRUE,
             collapsed = TRUE,
@@ -133,7 +133,7 @@ ui <- dashboardPage(
         fluidRow(
           column(1),
           box(
-            title = 'Goal',
+            title = p(icon('bullseye'), 'Goal'),
             width = 10,
             collapsible = TRUE,
             p(em('To walkthrough how to get a team\'s predicted XG for a certain match'))
@@ -142,7 +142,7 @@ ui <- dashboardPage(
         fluidRow(
           column(1),
           box(
-            title = 'How to Find Specific Match Data on FBref',
+            title = p(icon('search'), 'How to Find Specific Match Data on FBref'),
             width = 10,
             collapsible = TRUE,
             p('Start on the', a('FBref homepage', href = 'https://fbref.com/en')),
@@ -168,7 +168,7 @@ ui <- dashboardPage(
                 p(em('Team = Manchester-City')),
                 style = 'padding-left: 2em;'
               ),
-              p(strong('Note:'), em('All other values are on the FBref match page'), align = 'right')
+              p(icon('exclamation-triangle'), em('All other values are on the FBref match page'), align = 'right')
             ),
             tabPanel(
               'SoT',
@@ -241,7 +241,7 @@ ui <- dashboardPage(
                 p(em('Dist = 14.6')),
                 style = 'padding-left: 2em;'
               ),
-              p(strong('Note:'), em('This table is NOT on the match page, it is in the'), strong('Match Logs (Premier League)'), em('tab for the specific team on FBref'), align = 'right'),
+              p(icon('exclamation-triangle'), em('This table is NOT on the match page, it is in the'), strong('Match Logs (Premier League)'), em('tab for the specific team on FBref'), align = 'right'),
               p(em('The'), strong('Dist'), em('column is specifically in the'), strong('Shooting'), em('table within the'), strong('Match Logs (Premier League)'), em('tab'), align = 'right'),
               p(em('Return to the page just before the'), strong('Date'), em('of the match was selected'), align = 'right'),
               p(em(a('Link', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'to the'), strong('Shooting'), em('table for Machester City\'s match against Chelsea on 1/3/2021'), align = 'right')
@@ -259,12 +259,12 @@ ui <- dashboardPage(
         fluidRow(
           column(1),
           box(
-            title = 'Predict XG',
+            title = p(icon('calculator'), 'Predict XG'),
             width = 10,
             collapsible = TRUE,
-            p('Plug all values into the', strong('XG Variables'), 'section in the', strong('Calculate'), 'tab'),
+            p('Plug all the values into the', strong('XG Variables'), 'section in the', strong('Calculate'), 'tab'),
             p('Click the', strong('Calculate XG'), 'button to get an XG prediction'),
-            p('For this match against Chelsea, Manchester City had an XG prediction of', strong('2.95'), 'goals and actually scored', strong('3'), 'goals')
+            p('For this match against Chelsea, Manchester City had an XG of', strong('2.95'), 'goals and actually scored', strong('3'), 'goals')
           )
         )
       ),
@@ -347,23 +347,22 @@ ui <- dashboardPage(
             )
           ),
           column(
-            width = 3,
-            offset = 1,
-            br(),
-            br(),
+            width = 4,
             conditionalPanel(
               condition = "input.Team != ''",
               dropdownButton(
-                h4(strong('Info')),
-                div(id = 'container', p('The 10'), strong('XG Variables'), p('to the left are used by the XGBoost model to predict XG')),
+                div(id = 'container', p('The 10'), strong('XG Variables'), p('are used by the XGBoost model to predict XG')),
                 br(),
-                div(id = 'container', p('Shown are the average values of the'), strong('XG Variables'), p('for'), strong(textOutput('TeamCopy2'))),
+                div(id = 'container', p('Initially shown are the average values of the'), strong('XG Variables'), p('for'), strong(textOutput('TeamCopy2'))),
                 br(),
-                div(id = 'container', p('An XG prediction is instantly calculated given the averages values of the'), strong('XG Variables')),
+                div(id = 'container', strong('Average XG'), p('was calculated given all the values of the'), strong('XG Variables'), p('for'), strong(textOutput('TeamCopy3'))),
                 br(),
-                div(id = 'container', p('Other values for the'), strong('XG Variables'), p('may be entered to calculate new XG predictions')),
+                div(id = 'container', p('Other values of the'), strong('XG Variables'), p('may be entered to calculate new XG predictions')),
+                br(),
+                div(id = 'container', icon('exclamation-triangle'), strong('Average XG'), em('will be different than the'), strong('Calculated XG'), em('for the average values of the'), strong('XG Variables'), em('because'), strong('Calculated XG'), em('was calculated with only the single average values for each of the'), strong('XG Variables'),
+                    align = 'right'),
                 status = 'primary',
-                size = 'lg',
+                size = 'sm',
                 icon = icon('info'),
                 tooltip = tooltipOptions(placement = 'top', title = 'Info')
               )
@@ -466,6 +465,7 @@ server <- function(input, output, session) {
   output$Team <- renderText(input$Team)
   output$TeamCopy <- renderText(input$Team)
   output$TeamCopy2 <- renderText(input$Team)
+  output$TeamCopy3 <- renderText(input$Team)
   
   observeEvent(input$Team, {
     updateNumericInput(session, 'SoT', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SoT)), digits = 2), min = 0, max = 100)
