@@ -283,15 +283,12 @@ ui <- dashboardPage(
               width = 4,
               dropdownButton(
                 h4(strong('Team')),
-                selectizeInput('Team', label = NULL,
-                               choices = c('', unique(sort(Full_PL_10$Team)))
-                ),
+                selectInput('Team', label = NULL, choices = c('', unique(sort(Full_PL_10$Team)))),
                 status = 'primary',
                 size = 'lg',
                 icon = icon('shield-alt'),
                 tooltip = tooltipOptions(placement = 'top', title = 'Select a team'),
-                right = TRUE,
-                inputId = 'teamButton'
+                right = TRUE
               ),
             ),
             column(
@@ -300,33 +297,27 @@ ui <- dashboardPage(
                 condition = "input.Team != ''",
                 dropdownButton(
                   h4(strong('Opponent')),
-                  selectizeInput('Opponent', label = NULL,
-                                 choices = c('', unique(Full_PL_10$Opponent))
-                  ),
+                  uiOutput('select_Opponent'),
                   status = 'primary',
                   size = 'lg',
                   icon = icon('shield-alt'),
                   tooltip = tooltipOptions(placement = 'top', title = 'Select an opponent'),
-                  right = TRUE,
-                  inputId = 'opponentButton'
+                  right = TRUE
                 )
               )
             ),
             column(
               width = 4,
               conditionalPanel(
-                condition = "input.Team != '' & input.Opponent != ''",
+                condition = "input.Team != ''",
                 dropdownButton(
                   h4(strong('Date')),
-                  selectizeInput('Date', label = NULL,
-                                 choices = c('', unique(Full_PL_10$Date))
-                  ),
+                  uiOutput('select_Date'),
                   status = 'primary',
                   size = 'lg',
                   icon = icon('calendar'),
                   tooltip = tooltipOptions(placement = 'top', title = 'Select a date'),
-                  right = TRUE,
-                  inputId = 'dateButton'
+                  right = TRUE
                 )
               )
             ),
@@ -356,7 +347,7 @@ ui <- dashboardPage(
               conditionalPanel(
                 condition = "input.Team != ''",
                 dropdownButton(
-                  div(id = 'container', p('The values of the'), strong('XG Variables'), p('have been reset for'), strong(textOutput('Team2'))),
+                  div(id = 'container', p('The values of the'), strong('XG Variables'), p('have been reset to the averages for'), strong(textOutput('Team2'))),
                   status = 'primary',
                   size = 'lg',
                   icon = icon('history'),
@@ -514,31 +505,13 @@ server <- function(input, output, session) {
   output$Team2 <- renderText(input$Team)
   output$Team3 <- renderText(input$Team)
   output$Team4 <- renderText(input$Team)
-  output$Team5 <- renderText(input$Team)
-  output$Team6 <- renderText(input$Team)
   
-  tab <- reactive({
-    Full_PL_10 %>% 
-      filter(Team == input$Team) %>% 
-      filter(Opponent == input$Opponent) %>% 
-      filter(Date == input$Date)
+  output$select_Opponent <- renderUI({
+    selectInput('Opponent', label = NULL, choices = c('', unique(sort(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Opponent)))))
   })
   
-  output$Opponent <- renderText({
-    tab()$Opponent
-  })
-  
-  Opponent.choice <- reactive({
-    Full_PL_10 %>% filter(Team == input$Team) %>% pull(Opponent)
-  })
-
-  Date.choice <- reactive({
-    Full_PL_10 %>% filter(Team == input$Team) %>% filter(Opponent == input$Opponent) %>% pull(Date)
-  })
-  
-  observe({
-    updateSelectizeInput(session, 'Opponent', choices = sort(Opponent.choice()))
-    updateSelectizeInput(session, 'Date', choices = sort(Date.choice()))
+  output$select_Date <- renderUI({
+    selectInput('Date', label = NULL, choices = c('', unique(sort(Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent) %>% pull(Date)))))
   })
   
   observeEvent(input$Team, {
