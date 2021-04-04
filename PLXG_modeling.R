@@ -8,11 +8,11 @@ pl_team_data <- vroom('Pl_team_match_data.csv') %>% mutate(Dist = ifelse(is.na(D
                                                            Opp_AvgDist = ifelse(is.na(Opp_AvgDist), 0, Opp_AvgDist))
 
 # For Visualization tab of app.R
-Full_PL_10 <- pl_team_data %>% select(Goals, Team, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW)
+Full_PL_10 <- pl_team_data %>% select(Goals, Team, Date, Opponent, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW)
 
 PLXG.Model <- readRDS('/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/PLXGModel.RData')
 
-Full_PL_10 <- Full_PL_10 %>% mutate(XG = round(predict(PLXG.Model, Full_PL_10 %>% select(-Goals)), digits = 2))
+Full_PL_10 <- Full_PL_10 %>% mutate(XG = round(predict(PLXG.Model, Full_PL_10 %>% select(-Goals, -Date, -Opponent)), digits = 2))
 
 # Full_PL_10 <- merge(Full_PL_10, Avg_Dat_10 %>% select(Team, XG), by = 'Team')
 

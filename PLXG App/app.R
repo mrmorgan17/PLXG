@@ -276,49 +276,94 @@ ui <- dashboardPage(
         br(),
         fluidRow(
           column(
-            width = 3,
-            offset = 1,     
-            br(),
-            br(),     
-            dropdownButton(
-              h4(strong('Team')),
-              selectInput('Team', label = NULL,
-                          choices = c('', unique(sort(Full_PL_10$Team)))),
-              status = 'primary',
-              size = 'lg',
-              icon = icon('shield-alt'),
-              tooltip = tooltipOptions(placement = 'top', title = 'Select a team'),
-              right = TRUE,
-              inputId = 'teamButton'
-            ),
+            width = 6,
             br(),
             br(),
-            br(),
-            conditionalPanel(
-              condition = "input.Team != ''",
+            column(
+              width = 4,
               dropdownButton(
-                div(id = 'container', p('An XG prediction has been calculated for'), strong(textOutput('Team'))),
+                h4(strong('Team')),
+                selectizeInput('Team', label = NULL,
+                               choices = c('', unique(sort(Full_PL_10$Team)))
+                ),
                 status = 'primary',
                 size = 'lg',
-                icon = icon('calculator'),
-                tooltip = tooltipOptions(placement = 'top', title = 'Calculate XG'),
+                icon = icon('shield-alt'),
+                tooltip = tooltipOptions(placement = 'top', title = 'Select a team'),
                 right = TRUE,
-                inputId = 'calculateButton'
+                inputId = 'teamButton'
+              ),
+            ),
+            column(
+              width = 4,
+              conditionalPanel(
+                condition = "input.Team != ''",
+                dropdownButton(
+                  h4(strong('Opponent')),
+                  selectizeInput('Opponent', label = NULL,
+                                 choices = c('', unique(Full_PL_10$Opponent))
+                  ),
+                  status = 'primary',
+                  size = 'lg',
+                  icon = icon('shield-alt'),
+                  tooltip = tooltipOptions(placement = 'top', title = 'Select an opponent'),
+                  right = TRUE,
+                  inputId = 'opponentButton'
+                )
               )
             ),
-            br(),
-            br(),
-            br(),
-            conditionalPanel(
-              condition = "input.Team != ''",
-              dropdownButton(
-                div(id = 'container', p('The values of the'), strong('XG Variables'), p('have been reset for'), strong(textOutput('TeamCopy'))),
-                status = 'primary',
-                size = 'lg',
-                icon = icon('history'),
-                tooltip = tooltipOptions(placement = 'top', title = 'Reset'),
-                right = TRUE,
-                inputId = 'resetButton'
+            column(
+              width = 4,
+              conditionalPanel(
+                condition = "input.Team != '' & input.Opponent != ''",
+                dropdownButton(
+                  h4(strong('Date')),
+                  selectizeInput('Date', label = NULL,
+                                 choices = c('', unique(Full_PL_10$Date))
+                  ),
+                  status = 'primary',
+                  size = 'lg',
+                  icon = icon('calendar'),
+                  tooltip = tooltipOptions(placement = 'top', title = 'Select a date'),
+                  right = TRUE,
+                  inputId = 'dateButton'
+                )
+              )
+            ),
+            column(
+              br(),
+              br(),
+              br(),
+              width = 12,
+              conditionalPanel(
+                condition = "input.Team != ''",
+                dropdownButton(
+                  div(id = 'container', p('An XG prediction has been calculated for'), strong(textOutput('Team'))),
+                  status = 'primary',
+                  size = 'lg',
+                  icon = icon('calculator'),
+                  tooltip = tooltipOptions(placement = 'top', title = 'Calculate XG'),
+                  right = TRUE,
+                  inputId = 'calculateButton'
+                )
+              )
+            ),
+            column(
+              br(),
+              br(),
+              br(),
+              width = 12,
+              conditionalPanel(
+                condition = "input.Team != ''",
+                dropdownButton(
+                  div(id = 'container', p('The values of the'), strong('XG Variables'), p('have been reset for'), strong(textOutput('Team2'))),
+                  status = 'primary',
+                  size = 'lg',
+                  icon = icon('history'),
+                  tooltip = tooltipOptions(placement = 'top', title = 'Reset'),
+                  right = TRUE,
+                  inputId = 'resetButton'
+                )
               )
             )
           ),
@@ -326,7 +371,7 @@ ui <- dashboardPage(
             condition = "input.Team != ''",
             box(
               title = strong('XG Variables'),
-              width = 4,
+              width = 6,
               background = 'light-blue',
               column(
                 width = 6,
@@ -345,17 +390,29 @@ ui <- dashboardPage(
                 numericInput('TklW', 'TklW', value = 0, min = 0,  max = 100, step = .01)
               )
             )
-          ),
+          )
+        ),
+        br(),
+        fluidRow(
+          conditionalPanel(
+            condition = "input.Team != ''",
+            infoBoxOutput('CalculatedXGBox'),
+            infoBoxOutput('XGBox'),
+            infoBoxOutput('DiffXGBox')
+          )
+        ),
+        br(),
+        fluidRow(
           column(
-            width = 4,
+            width = 12,
             conditionalPanel(
               condition = "input.Team != ''",
               dropdownButton(
-                div(id = 'container', p('The 10'), strong('XG Variables'), p('are used by the XGBoost model to predict XG')),
+                div(id = 'container', p('The'), strong('XG Variables'), p('are used by the XGBoost model to predict XG')),
                 br(),
-                div(id = 'container', p('Initially shown are the average values of the'), strong('XG Variables'), p('for'), strong(textOutput('TeamCopy2'))),
+                div(id = 'container', p('Initially shown are the average values of the'), strong('XG Variables'), p('for'), strong(textOutput('Team3'))),
                 br(),
-                div(id = 'container', strong('Average XG'), p('was calculated given all the values of the'), strong('XG Variables'), p('for'), strong(textOutput('TeamCopy3'))),
+                div(id = 'container', strong('Average XG'), p('was calculated given all the values of the'), strong('XG Variables'), p('for'), strong(textOutput('Team4'))),
                 br(),
                 div(id = 'container', p('Other values of the'), strong('XG Variables'), p('may be entered to calculate new XG predictions')),
                 br(),
@@ -367,15 +424,6 @@ ui <- dashboardPage(
                 tooltip = tooltipOptions(placement = 'top', title = 'Info')
               )
             )
-          )
-        ),
-        br(),
-        fluidRow(
-          conditionalPanel(
-            condition = "input.Team != ''",
-            infoBoxOutput('CalculatedXGBox'),
-            infoBoxOutput('XGBox'),
-            infoBoxOutput('DiffXGBox')
           )
         )
       ),
@@ -463,9 +511,35 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   
   output$Team <- renderText(input$Team)
-  output$TeamCopy <- renderText(input$Team)
-  output$TeamCopy2 <- renderText(input$Team)
-  output$TeamCopy3 <- renderText(input$Team)
+  output$Team2 <- renderText(input$Team)
+  output$Team3 <- renderText(input$Team)
+  output$Team4 <- renderText(input$Team)
+  output$Team5 <- renderText(input$Team)
+  output$Team6 <- renderText(input$Team)
+  
+  tab <- reactive({
+    Full_PL_10 %>% 
+      filter(Team == input$Team) %>% 
+      filter(Opponent == input$Opponent) %>% 
+      filter(Date == input$Date)
+  })
+  
+  output$Opponent <- renderText({
+    tab()$Opponent
+  })
+  
+  Opponent.choice <- reactive({
+    Full_PL_10 %>% filter(Team == input$Team) %>% pull(Opponent)
+  })
+
+  Date.choice <- reactive({
+    Full_PL_10 %>% filter(Team == input$Team) %>% filter(Opponent == input$Opponent) %>% pull(Date)
+  })
+  
+  observe({
+    updateSelectizeInput(session, 'Opponent', choices = sort(Opponent.choice()))
+    updateSelectizeInput(session, 'Date', choices = sort(Date.choice()))
+  })
   
   observeEvent(input$Team, {
     updateNumericInput(session, 'SoT', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SoT)), digits = 2), min = 0, max = 100)
@@ -478,6 +552,19 @@ server <- function(input, output, session) {
     updateNumericInput(session, 'Clr', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Clr)), digits = 2), min = 0, max = 100)
     updateNumericInput(session, 'Dist', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dist)), digits = 2), min = 0, max = 100)
     updateNumericInput(session, 'TklW', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TklW)), digits = 2), min = 0, max = 100)
+  })
+  
+  observeEvent(input$Date, {
+    updateNumericInput(session, 'SoT', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(SoT), min = 0, max = 100)
+    updateNumericInput(session, 'Opp_Saves', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Opp_Saves), min = 0, max = 100)
+    updateNumericInput(session, 'PKatt', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(PKatt), min = 0, max = 100)
+    updateNumericInput(session, 'SCA_Total', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(SCA_Total), min = 0, max = 100)
+    updateNumericInput(session, 'Short_Cmp', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Short_Cmp), min = 0, max = 1000)
+    updateNumericInput(session, 'TB', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(TB), min = 0, max = 100)
+    updateNumericInput(session, 'Dead', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Dead), min = 0, max = 100)
+    updateNumericInput(session, 'Clr', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Clr), min = 0, max = 100)
+    updateNumericInput(session, 'Dist', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Dist), min = 0, max = 100)
+    updateNumericInput(session, 'TklW', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(TklW), min = 0, max = 100)
   })
   
   selectedValues <- eventReactive(input$calculateButton, {
