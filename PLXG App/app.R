@@ -168,7 +168,8 @@ ui <- dashboardPage(
                 p(em('Team = Manchester-City')),
                 style = 'padding-left: 2em;'
               ),
-              p(icon('exclamation-triangle'), em('All other values are on the FBref match page'), align = 'right')
+              br(),
+              p(icon('exclamation-triangle'), em('All other values are on the FBref match page'))
             ),
             tabPanel(
               'SoT',
@@ -241,10 +242,14 @@ ui <- dashboardPage(
                 p(em('Dist = 14.6')),
                 style = 'padding-left: 2em;'
               ),
-              p(icon('exclamation-triangle'), em('This table is NOT on the match page, it is in the'), strong('Match Logs (Premier League)'), em('tab for the specific team on FBref'), align = 'right'),
-              p(em('The'), strong('Dist'), em('column is specifically in the'), strong('Shooting'), em('table within the'), strong('Match Logs (Premier League)'), em('tab'), align = 'right'),
-              p(em('Return to the page just before the'), strong('Date'), em('of the match was selected'), align = 'right'),
-              p(em(a('Link', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'to the'), strong('Shooting'), em('table for Machester City\'s match against Chelsea on 1/3/2021'), align = 'right')
+              br(),
+              p(icon('exclamation-triangle'), em('This table is NOT on the match page, it is on the'), strong('Match Logs (Premier League)'), em('tab for the specific team on FBref')),
+              div(
+                p(em('The'), strong('Dist'), em('column is specifically in the'), strong('Shooting'), em('table within the'), strong('Match Logs (Premier League)'), em('tab')),
+                p(em('Return to the page just before the'), strong('Date'), em('of the match was selected')),
+                p(em(a('Link', href = 'https://fbref.com/en/squads/b8fd03ef/2020-2021/matchlogs/s10728/shooting/Manchester-City-Match-Logs-Premier-League'), 'to the'), strong('Shooting'), em('table for Machester City\'s match against Chelsea on 1/3/2021')),
+                style = 'padding-left: 1.3em;'
+              )
             ),
             tabPanel(
               'TklW',
@@ -282,19 +287,21 @@ ui <- dashboardPage(
               conditionalPanel(
                 condition = "input.Team != ''",
                 dropdownButton(
-                  div(id = 'container', p('The'), strong('XG Variables'), p('are used by the XGBoost model to predict XG')),
+                  div(id = 'container', p('The XGBoost model uses the'), strong('XG Variables'), p('to predict XG')),
                   br(),
                   div(id = 'container', p('Initially shown are the average values of the'), strong('XG Variables'), p('for'), strong(textOutput('Team3'))),
                   br(),
-                  div(id = 'container', strong('Average XG'), p('was calculated given all values of the'), strong('XG Variables'), p('from all matches for'), strong(textOutput('Team4'))),
+                  div(id = 'container', strong('Average XG'), p('is a prediction for how many goals'), strong(textOutput('Team4')), p('scores on average in all their matches')),
                   br(),
-                  div(id = 'container', p('New values of the'), strong('XG Variables'), p('may be entered to calculate new XG predictions')),
+                  div(id = 'container', p('Enter new values of the'), strong('XG Variables'), p('to calculate new XG predictions')),
                   br(),
-                  div(id = 'container', p('Values of the'), strong('XG Variables'), p('for a specific match will appear after selecting an'), strong('Opponent'), p('and a'), strong('Date')),
+                  div(id = 'container', p('Values of the'), strong('XG Variables'), p('for a specific match will appear after selecting an'), strong('Opponent'), p('and a'), strong('Date'), p('for'), strong(textOutput('Team5'))),
                   br(),
-                  div(id = 'container', icon('exclamation-triangle'), strong('Average XG'), em('will be different than the'), strong('Calculated XG'), em('for the average values of the')), 
-                  div(strong('XG Variables'), em('because'), strong('Calculated XG'), em('was calculated with only the single average values for each of the'), strong('XG Variables'),
-                      style = 'padding-left: 1.3em;'),
+                  div(id = 'container', icon('exclamation-triangle'), strong('Average XG'), em('will not equal'), strong('Calculated XG'), em('for the average values of the')), 
+                  div(
+                    strong('XG Variables'), em('because in this case,'), strong('Calculated XG'), em('relates to one match while'), strong('Average XG'), em('relates to many matches'),
+                    style = 'padding-left: 1.3em;'
+                  ),
                   status = 'primary',
                   size = 'sm',
                   icon = icon('info'),
@@ -327,7 +334,7 @@ ui <- dashboardPage(
                   uiOutput('select_Opponent'),
                   status = 'primary',
                   size = 'lg',
-                  icon = icon('shield-alt'),
+                  icon = icon('plus'),
                   tooltip = tooltipOptions(placement = 'top', title = 'Select an opponent'),
                   right = TRUE
                 )
@@ -509,6 +516,7 @@ server <- function(input, output, session) {
   output$Team2 <- renderText(input$Team)
   output$Team3 <- renderText(input$Team)
   output$Team4 <- renderText(input$Team)
+  output$Team5 <- renderText(input$Team)
   
   output$select_Opponent <- renderUI({
     selectInput('Opponent', label = NULL, choices = c('', unique(sort(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Opponent)))))
