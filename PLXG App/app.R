@@ -277,10 +277,35 @@ ui <- dashboardPage(
         fluidRow(
           column(
             width = 6,
-            br(),
-            br(),
+            column(
+              width = 12,
+              conditionalPanel(
+                condition = "input.Team != ''",
+                dropdownButton(
+                  div(id = 'container', p('The'), strong('XG Variables'), p('are used by the XGBoost model to predict XG')),
+                  br(),
+                  div(id = 'container', p('Initially shown are the average values of the'), strong('XG Variables'), p('for'), strong(textOutput('Team3'))),
+                  br(),
+                  div(id = 'container', strong('Average XG'), p('was calculated given all values of the'), strong('XG Variables'), p('from all matches for'), strong(textOutput('Team4'))),
+                  br(),
+                  div(id = 'container', p('New values of the'), strong('XG Variables'), p('may be entered to calculate new XG predictions')),
+                  br(),
+                  div(id = 'container', p('Values of the'), strong('XG Variables'), p('for a specific match will appear after selecting an'), strong('Opponent'), p('and a'), strong('Date')),
+                  br(),
+                  div(id = 'container', icon('exclamation-triangle'), strong('Average XG'), em('will be different than the'), strong('Calculated XG'), em('for the average values of the')), 
+                  div(strong('XG Variables'), em('because'), strong('Calculated XG'), em('was calculated with only the single average values for each of the'), strong('XG Variables'),
+                      style = 'padding-left: 1.3em;'),
+                  status = 'primary',
+                  size = 'sm',
+                  icon = icon('info'),
+                  tooltip = tooltipOptions(placement = 'top', title = 'Info')
+                )
+              )
+            ),
             column(
               width = 4,
+              br(),
+              br(),
               dropdownButton(
                 h4(strong('Team')),
                 selectInput('Team', label = NULL, choices = c('', unique(sort(Full_PL_10$Team)))),
@@ -293,6 +318,8 @@ ui <- dashboardPage(
             ),
             column(
               width = 4,
+              br(),
+              br(),
               conditionalPanel(
                 condition = "input.Team != ''",
                 dropdownButton(
@@ -308,6 +335,8 @@ ui <- dashboardPage(
             ),
             column(
               width = 4,
+              br(),
+              br(),
               conditionalPanel(
                 condition = "input.Team != ''",
                 dropdownButton(
@@ -347,7 +376,7 @@ ui <- dashboardPage(
               conditionalPanel(
                 condition = "input.Team != ''",
                 dropdownButton(
-                  div(id = 'container', p('The values of the'), strong('XG Variables'), p('have been reset to the averages for'), strong(textOutput('Team2'))),
+                  div(id = 'container', strong('XG Variables'), p('have been reset to the averages for'), strong(textOutput('Team2'))),
                   status = 'primary',
                   size = 'lg',
                   icon = icon('history'),
@@ -390,31 +419,6 @@ ui <- dashboardPage(
             infoBoxOutput('CalculatedXGBox'),
             infoBoxOutput('XGBox'),
             infoBoxOutput('DiffXGBox')
-          )
-        ),
-        br(),
-        fluidRow(
-          column(
-            width = 12,
-            conditionalPanel(
-              condition = "input.Team != ''",
-              dropdownButton(
-                div(id = 'container', p('The'), strong('XG Variables'), p('are used by the XGBoost model to predict XG')),
-                br(),
-                div(id = 'container', p('Initially shown are the average values of the'), strong('XG Variables'), p('for'), strong(textOutput('Team3'))),
-                br(),
-                div(id = 'container', strong('Average XG'), p('was calculated given all the values of the'), strong('XG Variables'), p('for'), strong(textOutput('Team4'))),
-                br(),
-                div(id = 'container', p('Other values of the'), strong('XG Variables'), p('may be entered to calculate new XG predictions')),
-                br(),
-                div(id = 'container', icon('exclamation-triangle'), strong('Average XG'), em('will be different than the'), strong('Calculated XG'), em('for the average values of the'), strong('XG Variables'), em('because'), strong('Calculated XG'), em('was calculated with only the single average values for each of the'), strong('XG Variables'),
-                    align = 'right'),
-                status = 'primary',
-                size = 'sm',
-                icon = icon('info'),
-                tooltip = tooltipOptions(placement = 'top', title = 'Info')
-              )
-            )
           )
         )
       ),
