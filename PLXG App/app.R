@@ -1,7 +1,8 @@
 library(shiny)
 library(shinycssloaders)
-library(shinyWidgets)
 library(shinydashboard)
+library(shinyjs)
+library(shinyWidgets)
 library(ggplot2)
 library(tidyverse)
 
@@ -33,8 +34,8 @@ ui <- dashboardPage(
         from = 'R Packages',
         message = div(
           helpText('caret, caTools, ggplot2, rvest,'),
-          helpText('shiny, shinydashboard, shinyWidgets,'),
-          helpText('shinycssloaders, tidyverse, vroom')
+          helpText('shiny, shinydashboard, shinycssloaders,'),
+          helpText('shinyjs, shinyWidgetns, tidyverse, vroom')
         ), 
         icon = icon('box')
       )
@@ -49,6 +50,7 @@ ui <- dashboardPage(
     )
   ),
   dashboardBody(
+    useShinyjs(),
     tags$head(tags$style("
                         #container * {
          display: inline;
@@ -136,7 +138,13 @@ ui <- dashboardPage(
             title = p(icon('bullseye'), 'Goal'),
             width = 10,
             collapsible = TRUE,
-            p(em('To walkthrough how to get a team\'s predicted XG for a certain match'))
+            p(em('To walkthrough how to get a team\'s predicted XG for a certain match')),
+            br(),
+            p(icon('exclamation-triangle'), em('Only matches from the 2017-2018 Premier League campaign and onward can be used because the variables used to predict XG were not recorded')),
+            div(
+              em('previous to the 2017-2018 Premier League campaign'),
+              style = 'padding-left: 1.3em;'  
+            )
           )
         ),
         fluidRow(
@@ -154,7 +162,7 @@ ui <- dashboardPage(
               style = 'padding-left: 2em;'
             ),
             p(em('For this example, Manchester City\'s match against Chelsea on 1/3/2021 will be analyzed')),
-            p(em(a('Link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the FBref match page')),
+            p(em(a('Link', href = 'https://fbref.com/en/matches/85507602/Chelsea-Manchester-City-January-3-2021-Premier-League'), 'to the FBref match page'))
           ),
         ),
         fluidRow(
@@ -293,13 +301,16 @@ ui <- dashboardPage(
                   br(),
                   div(id = 'container', strong('Average XG'), p('is a prediction for how many goals'), strong(textOutput('Team4')), p('scores on average in all their matches')),
                   br(),
-                  div(id = 'container', p('Enter new values of the'), strong('XG Variables'), p('to calculate new XG predictions')),
+                  div(id = 'container', p('Click the'), icon('calculator'), p('button to see what the XG for'), strong(textOutput('Team5')), p('would be if they performed according to the values of the'), strong('XG Variables'), p('in a match')),
                   br(),
-                  div(id = 'container', p('Values of the'), strong('XG Variables'), p('for a specific match will appear after selecting an'), strong('Opponent'), p('and a'), strong('Date'), p('for'), strong(textOutput('Team5'))),
+                  div(id = 'container', p('Values of the'), strong('XG Variables'), p('for a specific match will appear after selecting an'), strong('Opponent'), p('and a'), strong('Date'), p('for'), strong(textOutput('Team6'))),
                   br(),
-                  div(id = 'container', icon('exclamation-triangle'), strong('Average XG'), em('will not equal'), strong('Calculated XG'), em('for the average values of the')), 
+                  div(id = 'container', p('Click the'), icon('history'), p('button to reset the'), strong('XG Variables'), p('back to the average values for'), strong(textOutput('Team7'))),
+                  br(),
+                  div(id = 'container', icon('exclamation-triangle'), strong('Average XG'), em('will not equal'), strong('Match XG'), em('for the average values of the'), strong('XG Variables')), 
                   div(
-                    strong('XG Variables'), em('because in this case,'), strong('Calculated XG'), em('relates to one match while'), strong('Average XG'), em('relates to many matches'),
+                    id = 'container',
+                    em('because'), strong('Average XG'), em('is the average of every match XG prediction for'), strong(textOutput('Team8')), p('while'), strong('Match XG'), em('is an XG prediction for one match where'), strong(textOutput('Team9')), em('performs averagely'),
                     style = 'padding-left: 1.3em;'
                   ),
                   status = 'primary',
@@ -336,7 +347,8 @@ ui <- dashboardPage(
                   size = 'lg',
                   icon = icon('plus'),
                   tooltip = tooltipOptions(placement = 'top', title = 'Select an opponent'),
-                  right = TRUE
+                  right = TRUE,
+                  inputId = 'opponentButton'
                 )
               )
             ),
@@ -353,7 +365,8 @@ ui <- dashboardPage(
                   size = 'lg',
                   icon = icon('calendar'),
                   tooltip = tooltipOptions(placement = 'top', title = 'Select a date'),
-                  right = TRUE
+                  right = TRUE,
+                  inputId = 'dateButton'
                 )
               )
             ),
@@ -365,11 +378,11 @@ ui <- dashboardPage(
               conditionalPanel(
                 condition = "input.Team != ''",
                 dropdownButton(
-                  div(id = 'container', p('An XG prediction has been calculated for'), strong(textOutput('Team'))),
+                  div(id = 'container', p('A match XG prediction has been calculated for'), strong(textOutput('Team'))),
                   status = 'primary',
                   size = 'lg',
                   icon = icon('calculator'),
-                  tooltip = tooltipOptions(placement = 'top', title = 'Calculate XG'),
+                  tooltip = tooltipOptions(placement = 'top', title = 'Calculate'),
                   right = TRUE,
                   inputId = 'calculateButton'
                 )
@@ -422,12 +435,24 @@ ui <- dashboardPage(
         br(),
         fluidRow(
           conditionalPanel(
+            condition = "input.Team != '' & input.calculateButton != 0",
+            infoBoxOutput('MatchXGBox')
+          ),
+          conditionalPanel(
             condition = "input.Team != ''",
-            infoBoxOutput('CalculatedXGBox'),
-            infoBoxOutput('XGBox'),
+            infoBoxOutput('AvgXGBox')
+          ),
+          conditionalPanel(
+            condition = "input.Team != '' & input.calculateButton != 0",
             infoBoxOutput('DiffXGBox')
           )
         )
+        # fluidRow(
+        #   conditionalPanel(
+        #     condition = "input.Opponent != '' & input.opponentButton != 0 & input.Date != '' & input.dateButton != 0",
+        #     infoBoxOutput('ActualGoalsBox')
+        #   )
+        # )
       ),
       tabItem(
         tabName = 'visualization',
@@ -517,6 +542,10 @@ server <- function(input, output, session) {
   output$Team3 <- renderText(input$Team)
   output$Team4 <- renderText(input$Team)
   output$Team5 <- renderText(input$Team)
+  output$Team6 <- renderText(input$Team)
+  output$Team7 <- renderText(input$Team)
+  output$Team8 <- renderText(input$Team)
+  output$Team9 <- renderText(input$Team)
   
   output$select_Opponent <- renderUI({
     selectInput('Opponent', label = NULL, choices = c('', unique(sort(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Opponent)))))
@@ -524,6 +553,10 @@ server <- function(input, output, session) {
   
   output$select_Date <- renderUI({
     selectInput('Date', label = NULL, choices = c('', unique(sort(Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent) %>% pull(Date)))))
+  })
+  
+  output$Goals <- renderText({
+    Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Goals)
   })
   
   observeEvent(input$Team, {
@@ -568,9 +601,9 @@ server <- function(input, output, session) {
     ) 
   })
   
-  output$CalculatedXGBox <- renderInfoBox({
+  output$MatchXGBox <- renderInfoBox({
     infoBox(
-      'Calculated XG', 
+      'Match XG', 
       ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2), silent = TRUE)) == 'try-error', 
              0, 
              round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2)
@@ -582,7 +615,7 @@ server <- function(input, output, session) {
     )
   })
   
-  output$XGBox <- renderInfoBox({
+  output$AvgXGBox <- renderInfoBox({
     infoBox(
       'Average XG', 
       ifelse(class(try(round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), silent = TRUE)) == 'try-error', 
@@ -599,17 +632,17 @@ server <- function(input, output, session) {
   output$DiffXGBox <- renderInfoBox({
     infoBox(
       'XG Difference', 
-      ifelse(class(try(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), silent = TRUE)) == 'try-error',
+      ifelse(class(try(round(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2), silent = TRUE)) == 'try-error',
              0,
-             round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2)
+             round(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2)
       ),
-      subtitle = em('Calculated XG - Average XG'),
+      subtitle = em('Match XG - Average XG'),
       icon = icon('futbol'),
-      color = if (class(try(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), silent = TRUE)) == 'try-error') {
+      color = if (class(try(round(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2), silent = TRUE)) == 'try-error') {
         'black'
-      } else if (round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2) < 0) {
+      } else if (round(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2) < 0) {
         'red'
-      } else if (round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2) > 0) {
+      } else if (round(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2) > 0) {
         'green'
       } else {
         'black'
@@ -617,6 +650,20 @@ server <- function(input, output, session) {
       fill = TRUE
     )
   })
+  
+  # output$ActualGoalsBox <- renderInfoBox({
+  #   infoBox(
+  #     'Match Goals',
+  #     ifelse(class(try(Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Goals), silent = TRUE)) == 'try-error',
+  #            0,
+  #            Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Goals)
+  #     ),
+  #     subtitle = input$Team,
+  #     icon = icon('futbol'),
+  #     color = 'light-blue',
+  #     fill = TRUE
+  #   )
+  # })
   
   observeEvent(input$resetButton, {
     updateNumericInput(session, 'SoT', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SoT)), digits = 2), min = 0, max = 100)
@@ -629,6 +676,7 @@ server <- function(input, output, session) {
     updateNumericInput(session, 'Clr', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Clr)), digits = 2), min = 0, max = 100)
     updateNumericInput(session, 'Dist', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dist)), digits = 2), min = 0, max = 100)
     updateNumericInput(session, 'TklW', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TklW)), digits = 2), min = 0, max = 100)
+    reset('Opponent')
   })
   
   output$dataPlot <- renderPlot({
