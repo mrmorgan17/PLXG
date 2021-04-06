@@ -2,6 +2,68 @@ library(tidyverse)
 library(vroom)
 library(caret)
 library(caTools)
+library(xgboost)
+
+pl_team_data <- vroom('Pl_team_match_data.csv') %>% mutate(Dist = ifelse(is.na(Dist), 0, Dist),
+                                                           Opp_GK_AvgLen = ifelse(is.na(Opp_GK_AvgLen), 0, Opp_GK_AvgLen),
+                                                           Opp_AvgDist = ifelse(is.na(Opp_AvgDist), 0, Opp_AvgDist))
+
+# For Visualization tab of app.R
+Full_PL_10 <- pl_team_data %>% select(Goals, Team, Date, Opponent, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW)
+
+split <- sample.split(Full_PL_10$Goals, SplitRatio = 0.8)
+
+Full_PL_10.train <- subset(Full_PL_10, split == TRUE)
+Full_PL_10.test <- subset(Full_PL_10, split == FALSE)
+
+train.y <- Full_PL_10.train$Goals
+test.y <- Full_PL_10.test$Goals
+
+Full_PL_10.train <- Full_PL_10.train %>% select(-Date, -Opponent, -Goals)
+Full_PL_10.test <- Full_PL_10.test %>% select(-Date, -Opponent, -Goals)
+
+train.x <- data.matrix(Full_PL_10.train)
+test.x <- data.matrix(Full_PL_10.test)
+
+xgb.train = xgb.DMatrix(data = train.x, label = train.y)
+xgb.test = xgb.DMatrix(data = test.x, label = test.y)
+
+watchlist = list(train = xgb.train, test = xgb.test)
+
+param <- list(objective = 'reg:squarederror', 
+              booster = 'gbtree',
+              eval_metric = 'rmse',
+              eta = .3,
+              max_depth = 1,
+              subsample = .75,
+              colsample_bytree = .85,
+              nthread = 8)
+
+clf <- xgb.cv(params = param, 
+              data = xgb.train, 
+              nrounds = 500,
+              nfold = 10,
+              watchlist = watchlist,
+              verbose = 1,
+              print_every_n = 10,
+              early_stopping_rounds = 20,
+              maximize = FALSE)
+
+# bestRound <- clf$best_iteration
+print(clf$evaluation_log[clf$best_iteration])
+
+xgb.model <- xgb.train(params = param, 
+                       data = xgb.train, 
+                       nrounds = bestRound,
+                       watchlist = watchlist,
+                       verbose = 1,
+                       maximize = FALSE)
+
+# .293
+
+sqrt(mean((test.y - stats::predict(xgb.model, test.x))^2))
+
+saveRDS(xgb.model, '/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/PLXGModel.RData')
 
 pl_team_data <- vroom('Pl_team_match_data.csv') %>% mutate(Dist = ifelse(is.na(Dist), 0, Dist),
                                                            Opp_GK_AvgLen = ifelse(is.na(Opp_GK_AvgLen), 0, Opp_GK_AvgLen),
@@ -12,7 +74,8 @@ Full_PL_10 <- pl_team_data %>% select(Goals, Team, Date, Opponent, SoT, Opp_Save
 
 PLXG.Model <- readRDS('/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/PLXGModel.RData')
 
-Full_PL_10 <- Full_PL_10 %>% mutate(XG = round(predict(PLXG.Model, Full_PL_10 %>% select(-Goals, -Date, -Opponent)), digits = 2))
+# Adding an XG prediction to each match
+Full_PL_10 <- Full_PL_10 %>% mutate(XG = round(stats::predict(PLXG.Model, Full_PL_10 %>% select(-Goals, -Date, -Opponent)), digits = 2))
 
 # Full_PL_10 <- merge(Full_PL_10, Avg_Dat_10 %>% select(Team, XG), by = 'Team')
 
@@ -94,11 +157,11 @@ xgbTree2.model <- train(Goals ~ .,
                         trControl = trainControl(method = 'cv', number = 10),
                         tuneGrid = expand.grid(nrounds = c(600, 650, 700, 750),
                                                max_depth = 1,
-                                               eta = c(.32, .325, .33, .333, .34),
+                                               eta = c(.3, .32, .325, .33, .333, .34),
                                                gamma = 0,
-                                               colsample_bytree = .8,
+                                               colsample_bytree = c(.8, .85),
                                                min_child_weight = 1,
-                                               subsample = 1),
+                                               subsample = c(.75, 1)),
                         maximize = FALSE)
 
 xgbTree2.model

@@ -5,7 +5,8 @@ library(shinyjs)
 library(shinyWidgets)
 library(caret)
 library(ggplot2)
-library(tidyverse)
+library(dplyr)
+library(xgboost)
 
 Full_PL_10 <- read.csv('Full_PL_10.csv')
 PLXG.Model <- readRDS('PLXGModel.RData')
@@ -34,9 +35,9 @@ ui <- dashboardPage(
       messageItem(
         from = 'R Packages',
         message = div(
-          helpText('caret, caTools, ggplot2, rvest,'),
+          helpText('caret, dplyr, ggplot2, rvest, xgboost'),
           helpText('shiny, shinydashboard, shinycssloaders,'),
-          helpText('shinyjs, shinyWidgetns, tidyverse, vroom')
+          helpText('shinyjs, shinyWidgets')
         ), 
         icon = icon('box')
       )
@@ -538,6 +539,8 @@ ui <- dashboardPage(
 # Define server
 server <- function(input, output, session) {
   
+  require(stats)
+  
   output$Team <- renderText(input$Team)
   output$Team2 <- renderText(input$Team)
   output$Team3 <- renderText(input$Team)
@@ -549,41 +552,41 @@ server <- function(input, output, session) {
   output$Team9 <- renderText(input$Team)
   
   output$select_Opponent <- renderUI({
-    selectInput('Opponent', label = NULL, choices = c('', unique(sort(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Opponent)))))
+    selectInput('Opponent', label = NULL, choices = c('', unique(sort(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(Opponent)))))
   })
-  
+
   output$select_Date <- renderUI({
-    selectInput('Date', label = NULL, choices = c('', unique(sort(Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent) %>% pull(Date)))))
+    selectInput('Date', label = NULL, choices = c('', unique(sort(Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent) %>% pull(Date)))))
   })
-  
+
   output$Goals <- renderText({
-    Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Goals)
+    Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Goals)
   })
-  
+
   observeEvent(input$Team, {
-    updateNumericInput(session, 'SoT', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SoT)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Opp_Saves', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'PKatt', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(PKatt)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'SCA_Total', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Short_Cmp', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp)), digits = 2), min = 0, max = 1000)
-    updateNumericInput(session, 'TB', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TB)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Dead', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dead)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Clr', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Clr)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Dist', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dist)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'TklW', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TklW)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'SoT', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(SoT)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Opp_Saves', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(Opp_Saves)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'PKatt', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(PKatt)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'SCA_Total', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(SCA_Total)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Short_Cmp', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(Short_Cmp)), digits = 2), min = 0, max = 1000)
+    updateNumericInput(session, 'TB', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(TB)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Dead', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(Dead)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Clr', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(Clr)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Dist', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(Dist)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'TklW', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(TklW)), digits = 2), min = 0, max = 100)
   })
-  
+
   observeEvent(input$Date, {
-    updateNumericInput(session, 'SoT', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(SoT), min = 0, max = 100)
-    updateNumericInput(session, 'Opp_Saves', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Opp_Saves), min = 0, max = 100)
-    updateNumericInput(session, 'PKatt', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(PKatt), min = 0, max = 100)
-    updateNumericInput(session, 'SCA_Total', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(SCA_Total), min = 0, max = 100)
-    updateNumericInput(session, 'Short_Cmp', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Short_Cmp), min = 0, max = 1000)
-    updateNumericInput(session, 'TB', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(TB), min = 0, max = 100)
-    updateNumericInput(session, 'Dead', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Dead), min = 0, max = 100)
-    updateNumericInput(session, 'Clr', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Clr), min = 0, max = 100)
-    updateNumericInput(session, 'Dist', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Dist), min = 0, max = 100)
-    updateNumericInput(session, 'TklW', value = Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(TklW), min = 0, max = 100)
+    updateNumericInput(session, 'SoT', value = Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(SoT), min = 0, max = 100)
+    updateNumericInput(session, 'Opp_Saves', value = Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Opp_Saves), min = 0, max = 100)
+    updateNumericInput(session, 'PKatt', value = Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(PKatt), min = 0, max = 100)
+    updateNumericInput(session, 'SCA_Total', value = Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(SCA_Total), min = 0, max = 100)
+    updateNumericInput(session, 'Short_Cmp', value = Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Short_Cmp), min = 0, max = 1000)
+    updateNumericInput(session, 'TB', value = Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(TB), min = 0, max = 100)
+    updateNumericInput(session, 'Dead', value = Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Dead), min = 0, max = 100)
+    updateNumericInput(session, 'Clr', value = Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Clr), min = 0, max = 100)
+    updateNumericInput(session, 'Dist', value = Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Dist), min = 0, max = 100)
+    updateNumericInput(session, 'TklW', value = Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(TklW), min = 0, max = 100)
   })
   
   selectedValues <- eventReactive(input$calculateButton, {
@@ -605,9 +608,9 @@ server <- function(input, output, session) {
   output$MatchXGBox <- renderInfoBox({
     infoBox(
       'Match XG', 
-      ifelse(class(try(round(predict(PLXG.Model, selectedValues()), digits = 2), silent = TRUE)) == 'try-error', 
-             0, 
-             round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2)
+      ifelse(class(try(round(stats::predict(PLXG.Model, selectedValues()), digits = 2), silent = TRUE)) == 'try-error',
+             0,
+             round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2)
       ),
       subtitle = input$Team,
       icon = icon('futbol'),
@@ -619,9 +622,9 @@ server <- function(input, output, session) {
   output$AvgXGBox <- renderInfoBox({
     infoBox(
       'Average XG', 
-      ifelse(class(try(round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), silent = TRUE)) == 'try-error', 
+      ifelse(class(try(round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), silent = TRUE)) == 'try-error', 
              0, 
-             round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2)
+             round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2)
       ),
       subtitle = input$Team,
       icon = icon('futbol'),
@@ -631,19 +634,20 @@ server <- function(input, output, session) {
   })
   
   output$DiffXGBox <- renderInfoBox({
+    
     infoBox(
       'XG Difference', 
-      ifelse(class(try(round(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2), silent = TRUE)) == 'try-error',
+      ifelse(class(try(round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2), silent = TRUE)) == 'try-error',
              0,
-             round(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2)
+             round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2)
       ),
       subtitle = em('Match XG - Average XG'),
       icon = icon('futbol'),
-      color = if (class(try(round(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2), silent = TRUE)) == 'try-error') {
+      color = if (class(try(round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2), silent = TRUE)) == 'try-error') {
         'black'
-      } else if (round(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2) < 0) {
+      } else if (round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2) < 0) {
         'red'
-      } else if (round(round(ifelse(predict(PLXG.Model, selectedValues()) < 0, 0, predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2) > 0) {
+      } else if (round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2) > 0) {
         'green'
       } else {
         'black'
@@ -667,30 +671,30 @@ server <- function(input, output, session) {
   # })
   
   observeEvent(input$resetButton, {
-    updateNumericInput(session, 'SoT', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SoT)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Opp_Saves', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Opp_Saves)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'PKatt', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(PKatt)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'SCA_Total', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(SCA_Total)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Short_Cmp', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Short_Cmp)), digits = 2), min = 0, max = 1000)
-    updateNumericInput(session, 'TB', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TB)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Dead', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dead)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Clr', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Clr)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'Dist', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(Dist)), digits = 2), min = 0, max = 100)
-    updateNumericInput(session, 'TklW', value = round(mean(Full_PL_10 %>% filter(Team == input$Team) %>% pull(TklW)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'SoT', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(SoT)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Opp_Saves', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(Opp_Saves)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'PKatt', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(PKatt)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'SCA_Total', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(SCA_Total)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Short_Cmp', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(Short_Cmp)), digits = 2), min = 0, max = 1000)
+    updateNumericInput(session, 'TB', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(TB)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Dead', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(Dead)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Clr', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(Clr)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'Dist', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(Dist)), digits = 2), min = 0, max = 100)
+    updateNumericInput(session, 'TklW', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(TklW)), digits = 2), min = 0, max = 100)
     reset('Opponent')
   })
   
   output$dataPlot <- renderPlot({
     Sys.sleep(.5)
-    ggplot(data.frame(x = Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), aes(x)) + 
+    ggplot(data.frame(x = Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)), aes(x)) + 
       geom_histogram(aes(y = ..density..), 
                      bins = input$nBins,
                      color = 'black', 
                      fill = '#a9daff') +
-      stat_function(fun = dnorm,
+      stat_function(fun = stats::dnorm,
                     args = list(
-                      mean = mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)),
-                      sd = sd(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable))
+                      mean = mean(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)),
+                      sd = stats::sd(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable))
                     ),
                     col = '#317196',
                     size = 2) +
@@ -706,7 +710,7 @@ server <- function(input, output, session) {
       paste(input$Variable, 'Average'), 
       ifelse(input$PlotTeam == '' | input$Variable == '', 
              0, 
-             round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)), 
+             round(mean(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)), 
                    digits = 2)
       ),
       subtitle = input$PlotTeam,
@@ -736,16 +740,16 @@ server <- function(input, output, session) {
       paste(input$Variable, 'Difference'),
       ifelse(input$PlotTeam == '' | input$Variable == '', 
              0, 
-             round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), 
+             round(mean(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), 
                    digits = 2)
       ),
       subtitle = em('Team Average - League Average'),
       icon = icon('futbol'),
       color = if (input$PlotTeam == '' | input$Variable == '') {
         'black'
-      } else if (round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), digits = 2) < 0) {
+      } else if (round(mean(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), digits = 2) < 0) {
         'red'
-      } else if (round(mean(Full_PL_10 %>% filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), digits = 2) > 0) {
+      } else if (round(mean(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), digits = 2) > 0) {
         'green'
       } else {
         'black'
