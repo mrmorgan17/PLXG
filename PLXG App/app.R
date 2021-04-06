@@ -3,6 +3,7 @@ library(shinycssloaders)
 library(shinydashboard)
 library(shinyjs)
 library(shinyWidgets)
+library(caret)
 library(ggplot2)
 library(tidyverse)
 
