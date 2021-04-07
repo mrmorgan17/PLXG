@@ -35,9 +35,9 @@ ui <- dashboardPage(
       messageItem(
         from = 'R Packages',
         message = div(
-          helpText('caret, dplyr, ggplot2, rvest, xgboost'),
-          helpText('shiny, shinydashboard, shinycssloaders,'),
-          helpText('shinyjs, shinyWidgets')
+          helpText('caret, dplyr, ggplot2, rvest,'),
+          helpText('xgboost, shiny, shinydashboard,'),
+          helpText('shinycssloaders, shinyjs, shinyWidgets')
         ), 
         icon = icon('box')
       )
@@ -333,7 +333,8 @@ ui <- dashboardPage(
                 size = 'lg',
                 icon = icon('shield-alt'),
                 tooltip = tooltipOptions(placement = 'top', title = 'Select a team'),
-                right = TRUE
+                right = TRUE,
+                inputId = 'teamButton'
               ),
             ),
             column(
@@ -448,13 +449,20 @@ ui <- dashboardPage(
             condition = "input.Team != '' & input.calculateButton != 0",
             infoBoxOutput('DiffXGBox')
           )
+        ),
+        fluidRow(
+          conditionalPanel(
+            condition = "input.Team != '' & input.teamButton != 0 & input.Opponent != '' & input.opponentButton != 0 & input.Date != '' & input.dateButton != 0",
+            infoBoxOutput('ActualGoalsBox'),
+            infoBoxOutput('MatchInfoBox'),
+            conditionalPanel(
+              condition = "input.calculateButton != 0",
+              if (class(try(infoBoxOutput('GoalXGDiffBox'), silent = TRUE)) != 'try-error') {
+                infoBoxOutput('GoalXGDiffBox')
+              }
+            )
+          )
         )
-        # fluidRow(
-        #   conditionalPanel(
-        #     condition = "input.Opponent != '' & input.opponentButton != 0 & input.Date != '' & input.dateButton != 0",
-        #     infoBoxOutput('ActualGoalsBox')
-        #   )
-        # )
       ),
       tabItem(
         tabName = 'visualization',
@@ -606,12 +614,12 @@ server <- function(input, output, session) {
   })
   
   output$MatchXGBox <- renderInfoBox({
+    
+    req(selectedValues())
+    
     infoBox(
       'Match XG', 
-      ifelse(class(try(round(stats::predict(PLXG.Model, selectedValues()), digits = 2), silent = TRUE)) == 'try-error',
-             0,
-             round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2)
-      ),
+      round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2),
       subtitle = input$Team,
       icon = icon('futbol'),
       color = 'light-blue',
@@ -620,12 +628,12 @@ server <- function(input, output, session) {
   })
   
   output$AvgXGBox <- renderInfoBox({
+    
+    req(input$Team)
+    
     infoBox(
       'Average XG', 
-      ifelse(class(try(round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), silent = TRUE)) == 'try-error', 
-             0, 
-             round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2)
-      ),
+      round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2),
       subtitle = input$Team,
       icon = icon('futbol'),
       color = 'light-blue',
@@ -635,17 +643,14 @@ server <- function(input, output, session) {
   
   output$DiffXGBox <- renderInfoBox({
     
+    req(selectedValues(), input$Team)
+    
     infoBox(
       'XG Difference', 
-      ifelse(class(try(round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2), silent = TRUE)) == 'try-error',
-             0,
-             round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2)
-      ),
+      round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2),
       subtitle = em('Match XG - Average XG'),
       icon = icon('futbol'),
-      color = if (class(try(round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2), silent = TRUE)) == 'try-error') {
-        'black'
-      } else if (round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2) < 0) {
+      color = if (round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2) < 0) {
         'red'
       } else if (round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(XG)), digits = 2), digits = 2) > 0) {
         'green'
@@ -656,19 +661,79 @@ server <- function(input, output, session) {
     )
   })
   
-  # output$ActualGoalsBox <- renderInfoBox({
-  #   infoBox(
-  #     'Match Goals',
-  #     ifelse(class(try(Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Goals), silent = TRUE)) == 'try-error',
-  #            0,
-  #            Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Goals)
-  #     ),
-  #     subtitle = input$Team,
-  #     icon = icon('futbol'),
-  #     color = 'light-blue',
-  #     fill = TRUE
-  #   )
-  # })
+  onclick(
+    'dateButton',
+    show(
+      output$ActualGoalsBox <- renderInfoBox({
+        
+        req(input$Team, input$Opponent, input$Date)
+        
+        infoBox(
+          'Match Goals',
+          Full_PL_10 %>% filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Goals),
+          subtitle = input$Team,
+          icon = icon('futbol'),
+          color = 'light-blue',
+          fill = TRUE
+        )
+      }),
+      output$MatchInfoBox <- renderInfoBox({
+        infoBox(
+          title = 'Match Info',
+          paste('Opponent:', input$Opponent), 
+          subtitle = paste('Date:', input$Date),
+          icon = icon('info'),
+          color = 'light-blue',
+          fill = TRUE
+        )
+      }),
+      onclick(
+        'calculateButton',
+        show(
+          output$GoalXGDiffBox <- renderInfoBox({
+            
+            req(input$Team, input$Opponent, input$Date, cancelOutput = TRUE)
+            
+            infoBox(
+              'Goal-XG Difference',
+              round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Goals)), digits = 2), digits = 2),
+              subtitle = em('Match XG - Match Goals'),
+              icon = icon('futbol'),
+              color = if (round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Goals)), digits = 2), digits = 2) < 0) {
+                'red'
+              } else if (round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Goals)), digits = 2), digits = 2) > 0) {
+                'green'
+              } else {
+                'black'
+              },
+              fill = TRUE
+            )
+          })
+        )
+      )
+    ),
+    hide(
+      output$GoalXGDiffBox <- NULL
+    )
+  )
+  
+  onclick(
+    'opponentButton',
+    hide(
+      output$ActualGoalsBox <- NULL,
+      output$MatchInfoBox <- NULL,
+      output$GoalXGDiffBox <- NULL
+    )
+  )
+  
+  onclick(
+    'teamButton',
+    hide(
+      output$ActualGoalsBox <- NULL,
+      output$MatchInfoBox <- NULL,
+      output$GoalXGDiffBox <- NULL
+    )
+  )
   
   observeEvent(input$resetButton, {
     updateNumericInput(session, 'SoT', value = round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team) %>% pull(SoT)), digits = 2), min = 0, max = 100)
@@ -706,13 +771,12 @@ server <- function(input, output, session) {
   output$Variable <- renderText(input$Variable)
   
   output$AvgBox <- renderInfoBox({
+    
+    req(input$PlotTeam, input$Variable)
+    
     infoBox(
       paste(input$Variable, 'Average'), 
-      ifelse(input$PlotTeam == '' | input$Variable == '', 
-             0, 
-             round(mean(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)), 
-                   digits = 2)
-      ),
+      round(mean(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)), digits = 2),
       subtitle = input$PlotTeam,
       icon = icon('futbol'),
       color = 'light-blue',
@@ -721,13 +785,12 @@ server <- function(input, output, session) {
   })
   
   output$LeagueAvgBox <- renderInfoBox({
+    
+    req(input$PlotTeam, input$Variable)
+    
     infoBox(
       'League Average', 
-      ifelse(input$PlotTeam == '' | input$Variable == '', 
-             0, 
-             round(mean(Full_PL_10 %>% pull(input$Variable)), 
-                   digits = 2)
-      ),
+      round(mean(Full_PL_10 %>% pull(input$Variable)), digits = 2),
       subtitle = input$Variable,
       icon = icon('futbol'),
       color = 'light-blue',
@@ -736,18 +799,15 @@ server <- function(input, output, session) {
   })
   
   output$DiffAvgBox <- renderInfoBox({
+    
+    req(input$PlotTeam, input$Variable)
+    
     infoBox(
       paste(input$Variable, 'Difference'),
-      ifelse(input$PlotTeam == '' | input$Variable == '', 
-             0, 
-             round(mean(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), 
-                   digits = 2)
-      ),
+      round(mean(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), digits = 2),
       subtitle = em('Team Average - League Average'),
       icon = icon('futbol'),
-      color = if (input$PlotTeam == '' | input$Variable == '') {
-        'black'
-      } else if (round(mean(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), digits = 2) < 0) {
+      color = if (round(mean(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), digits = 2) < 0) {
         'red'
       } else if (round(mean(Full_PL_10 %>% dplyr::filter(Team == input$PlotTeam) %>% pull(input$Variable)) - mean(Full_PL_10 %>% pull(input$Variable)), digits = 2) > 0) {
         'green'
