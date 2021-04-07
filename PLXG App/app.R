@@ -688,6 +688,8 @@ server <- function(input, output, session) {
           onclick(
             'calculateButton',
             hide(
+              output$ActualGoalsBox <- NULL,
+              output$MatchInfoBox <- NULL,
               output$GoalXGDiffBox <- NULL
             )
           ),
@@ -709,10 +711,7 @@ server <- function(input, output, session) {
           })
         )
       )
-    ),
-    hide(
-      output$GoalXGDiffBox <- NULL
-    )
+    ) 
   )
   
   onclick(
