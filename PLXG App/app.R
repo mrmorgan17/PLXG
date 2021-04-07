@@ -335,7 +335,7 @@ ui <- dashboardPage(
                 tooltip = tooltipOptions(placement = 'top', title = 'Select a team'),
                 right = TRUE,
                 inputId = 'teamButton'
-              ),
+              )
             ),
             column(
               width = 4,
@@ -454,13 +454,11 @@ ui <- dashboardPage(
           conditionalPanel(
             condition = "input.Team != '' & input.teamButton != 0 & input.Opponent != '' & input.opponentButton != 0 & input.Date != '' & input.dateButton != 0",
             infoBoxOutput('ActualGoalsBox'),
-            infoBoxOutput('MatchInfoBox'),
-            conditionalPanel(
-              condition = "input.calculateButton != 0",
-              if (class(try(infoBoxOutput('GoalXGDiffBox'), silent = TRUE)) != 'try-error') {
-                infoBoxOutput('GoalXGDiffBox')
-              }
-            )
+            infoBoxOutput('MatchInfoBox') #,
+            # conditionalPanel(
+            #   condition = "input.calculateButton != 0",
+            #   infoBoxOutput('GoalXGDiffBox')
+            # )
           )
         )
       ),
@@ -666,7 +664,7 @@ server <- function(input, output, session) {
     show(
       output$ActualGoalsBox <- renderInfoBox({
         
-        req(input$Team, input$Opponent, input$Date)
+        req(input$Team, input$Opponent, input$Date, selectedValues())
         
         infoBox(
           'Match Goals',
@@ -692,7 +690,7 @@ server <- function(input, output, session) {
         show(
           output$GoalXGDiffBox <- renderInfoBox({
             
-            req(input$Team, input$Opponent, input$Date, cancelOutput = TRUE)
+            # req(input$Team != 0)
             
             infoBox(
               'Goal-XG Difference',
