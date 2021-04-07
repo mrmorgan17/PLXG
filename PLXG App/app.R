@@ -454,11 +454,11 @@ ui <- dashboardPage(
           conditionalPanel(
             condition = "input.Team != '' & input.teamButton != 0 & input.Opponent != '' & input.opponentButton != 0 & input.Date != '' & input.dateButton != 0",
             infoBoxOutput('ActualGoalsBox'),
-            infoBoxOutput('MatchInfoBox') #,
-            # conditionalPanel(
-            #   condition = "input.calculateButton != 0",
-            #   infoBoxOutput('GoalXGDiffBox')
-            # )
+            infoBoxOutput('MatchInfoBox'),
+            conditionalPanel(
+              condition = "input.calculateButton != 0",
+              infoBoxOutput('GoalXGDiffBox')
+            )
           )
         )
       ),
@@ -610,7 +610,7 @@ server <- function(input, output, session) {
       TklW = input$TklW
     ) 
   })
-  
+
   output$MatchXGBox <- renderInfoBox({
     
     req(selectedValues())
@@ -688,10 +688,13 @@ server <- function(input, output, session) {
       onclick(
         'calculateButton',
         show(
+          onclick(
+            'calculateButton',
+            hide(
+              output$GoalXGDiffBox <- NULL
+            )
+          ),
           output$GoalXGDiffBox <- renderInfoBox({
-            
-            # req(input$Team != 0)
-            
             infoBox(
               'Goal-XG Difference',
               round(round(ifelse(stats::predict(PLXG.Model, selectedValues()) < 0, 0, stats::predict(PLXG.Model, selectedValues())), digits = 2) - round(mean(Full_PL_10 %>% dplyr::filter(Team == input$Team & Opponent == input$Opponent & Date == input$Date) %>% pull(Goals)), digits = 2), digits = 2),
