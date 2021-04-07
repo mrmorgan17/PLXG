@@ -455,10 +455,7 @@ ui <- dashboardPage(
             condition = "input.Team != '' & input.teamButton != 0 & input.Opponent != '' & input.opponentButton != 0 & input.Date != '' & input.dateButton != 0",
             infoBoxOutput('ActualGoalsBox'),
             infoBoxOutput('MatchInfoBox'),
-            conditionalPanel(
-              condition = "input.calculateButton != 0",
-              infoBoxOutput('GoalXGDiffBox')
-            )
+            infoBoxOutput('GoalXGDiffBox')
           )
         )
       ),
