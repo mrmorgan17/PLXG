@@ -4,90 +4,10 @@ library(caret)
 library(caTools)
 library(xgboost)
 
+# Read in data and impute 0s for NAs
 pl_team_data <- vroom('Pl_team_match_data.csv') %>% mutate(Dist = ifelse(is.na(Dist), 0, Dist),
                                                            Opp_GK_AvgLen = ifelse(is.na(Opp_GK_AvgLen), 0, Opp_GK_AvgLen),
                                                            Opp_AvgDist = ifelse(is.na(Opp_AvgDist), 0, Opp_AvgDist))
-
-# For Visualization tab of app.R
-Full_PL_10 <- pl_team_data %>% select(Goals, Team, Date, Opponent, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW)
-
-split <- sample.split(Full_PL_10$Goals, SplitRatio = 0.8)
-
-Full_PL_10.train <- subset(Full_PL_10, split == TRUE)
-Full_PL_10.test <- subset(Full_PL_10, split == FALSE)
-
-train.y <- Full_PL_10.train$Goals
-test.y <- Full_PL_10.test$Goals
-
-Full_PL_10.train <- Full_PL_10.train %>% select(-Date, -Opponent, -Goals)
-Full_PL_10.test <- Full_PL_10.test %>% select(-Date, -Opponent, -Goals)
-
-train.x <- data.matrix(Full_PL_10.train)
-test.x <- data.matrix(Full_PL_10.test)
-
-xgb.train = xgb.DMatrix(data = train.x, label = train.y)
-xgb.test = xgb.DMatrix(data = test.x, label = test.y)
-
-watchlist = list(train = xgb.train, test = xgb.test)
-
-param <- list(objective = 'reg:squarederror', 
-              booster = 'gbtree',
-              eval_metric = 'rmse',
-              eta = .3,
-              max_depth = 1,
-              subsample = .75,
-              colsample_bytree = .85,
-              nthread = 8)
-
-clf <- xgb.cv(params = param, 
-              data = xgb.train, 
-              nrounds = 500,
-              nfold = 10,
-              watchlist = watchlist,
-              verbose = 1,
-              print_every_n = 10,
-              early_stopping_rounds = 20,
-              maximize = FALSE)
-
-# bestRound <- clf$best_iteration
-print(clf$evaluation_log[clf$best_iteration])
-
-xgb.model <- xgb.train(params = param, 
-                       data = xgb.train, 
-                       nrounds = bestRound,
-                       watchlist = watchlist,
-                       verbose = 1,
-                       maximize = FALSE)
-
-# .293
-
-sqrt(mean((test.y - stats::predict(xgb.model, test.x))^2))
-
-saveRDS(xgb.model, '/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/PLXGModel.RData')
-
-pl_team_data <- vroom('Pl_team_match_data.csv') %>% mutate(Dist = ifelse(is.na(Dist), 0, Dist),
-                                                           Opp_GK_AvgLen = ifelse(is.na(Opp_GK_AvgLen), 0, Opp_GK_AvgLen),
-                                                           Opp_AvgDist = ifelse(is.na(Opp_AvgDist), 0, Opp_AvgDist))
-
-# For Visualization tab of app.R
-Full_PL_10 <- pl_team_data %>% select(Goals, Team, Date, Opponent, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW)
-
-PLXG.Model <- readRDS('/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/PLXGModel.RData')
-
-# Adding an XG prediction to each match
-Full_PL_10 <- Full_PL_10 %>% mutate(XG = round(stats::predict(PLXG.Model, Full_PL_10 %>% select(-Goals, -Date, -Opponent)), digits = 2))
-
-# Full_PL_10 <- merge(Full_PL_10, Avg_Dat_10 %>% select(Team, XG), by = 'Team')
-
-write.csv(Full_PL_10, '/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/Full_PL_10.csv', row.names = FALSE)
-
-
-
-# Dist = 2 NA's
-# Opp_GK_AvgLen = 37 NA's
-# Opp_AvgDist = 24 NA's
-
-# NA's were imputed with 0s
 
 # Splitting the data into a training set and a test set
 split <- sample.split(pl_team_data$Goals, SplitRatio = 0.8)
@@ -258,25 +178,73 @@ sqrt(mean((test.Goals - xgbLinear.preds)^2))
 
 sqrt(mean((test.Goals - xgbLinear.rounded.preds)^2))
 
-# Getting Team Averages
-Pl_team_avg <- pl_team_data %>% select(-Goals, -Date, -Round, -Venue, -Opponent) %>% group_split(Team)
+# For app.R
+Full_PL_10 <- pl_team_data %>% select(Goals, Team, Date, Opponent, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW)
 
-Avg_Dat <- list()
+# Reading in the model that is being used by app.R
+PLXG.Model <- readRDS('/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/PLXGModel.RData')
 
-for (i in 1:length(Pl_team_avg)) {
-  Avg_Dat[[i]] <- as.data.frame(t(apply(Pl_team_avg[[i]] %>% select(-Team), 2, mean)))
-  Avg_Dat[[i]]$Team <- Pl_team_avg[[i]] %>% pull(Team) %>% head(1)
-}
+# Adding an XG prediction to each match
+Full_PL_10 <- Full_PL_10 %>% mutate(XG = round(stats::predict(PLXG.Model, Full_PL_10 %>% select(-Goals, -Date, -Opponent)), digits = 2))
 
-Avg_Dat <- do.call(rbind, Avg_Dat)
+# Full_PL_10 <- merge(Full_PL_10, Avg_Dat_10 %>% select(Team, XG), by = 'Team')
 
-# Putting the Team column first
-Avg_Dat <- Avg_Dat[,c(98, 1:97)]
+# Write out Full_PL_10 to be used in app.R
+write.csv(Full_PL_10, '/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/Full_PL_10.csv', row.names = FALSE)
 
-# Select the Team and the 10 most important variables
-Avg_Dat_10 <- Avg_Dat %>% select(Team, SoT, Opp_Saves, PKatt, SCA_Total, Short_Cmp, TB, Dead, Clr, Dist, TklW) 
-Avg_Dat_10$XG <- round(predict(PLXG.Model, Avg_Dat_10), digits = 2)
+# Removing the XG column before modeling
+Full_PL_10$XG <- NULL
 
-# Writing out a .csv of each team's averages for the 10 most important variables for xgbTree3.model to be used in the Shint App
-write.csv(Avg_Dat_10, '/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/PL_10.csv', row.names = FALSE)
+# Using the xgboost package
 
+# Splitting Full_PL_10 into a training and test set
+split <- sample.split(Full_PL_10$Goals, SplitRatio = 0.8)
+
+Full_PL_10.train <- subset(Full_PL_10, split == TRUE)
+Full_PL_10.test <- subset(Full_PL_10, split == FALSE)
+
+train.y <- Full_PL_10.train$Goals
+test.y <- Full_PL_10.test$Goals
+
+Full_PL_10.train <- Full_PL_10.train %>% select(-Date, -Opponent, -Goals)
+Full_PL_10.test <- Full_PL_10.test %>% select(-Date, -Opponent, -Goals)
+
+train.x <- data.matrix(Full_PL_10.train)
+test.x <- data.matrix(Full_PL_10.test)
+
+xgb.train = xgb.DMatrix(data = train.x, label = train.y)
+xgb.test = xgb.DMatrix(data = test.x, label = test.y)
+
+watchlist = list(train = xgb.train, test = xgb.test)
+
+param <- list(objective = 'reg:squarederror', 
+              booster = 'gbtree',
+              eval_metric = 'rmse',
+              eta = .3,
+              max_depth = 1,
+              subsample = .75,
+              colsample_bytree = .85,
+              nthread = 8)
+
+clf <- xgb.cv(params = param, 
+              data = xgb.train, 
+              nrounds = 500,
+              nfold = 10,
+              watchlist = watchlist,
+              verbose = 1,
+              print_every_n = 10,
+              early_stopping_rounds = 20,
+              maximize = FALSE)
+
+# bestRound <- clf$best_iteration
+print(clf$evaluation_log[clf$best_iteration])
+
+xgb.model <- xgb.train(params = param, 
+                       data = xgb.train, 
+                       nrounds = bestRound,
+                       watchlist = watchlist,
+                       verbose = 1,
+                       maximize = FALSE)
+
+# Calculate train RMSE ~ .293
+sqrt(mean((test.y - stats::predict(xgb.model, test.x))^2))
