@@ -1,5 +1,4 @@
-# PLXG
-## Premier League eXpected Goals (PLXG)
+# Premier League eXpected Goals (PLXG)
 
 This respository contains my efforts to predict how many goals a Premier League team would score in a certain match.
 
