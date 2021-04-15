@@ -118,7 +118,7 @@ ui <- dashboardPage(
             collapsible = TRUE,
             collapsed = TRUE,
             p('The dataset was used to build various models in an effort to predict the number of goals that would be scored by a particular team in any given match'),
-            p('Models were trained to minimize the Root Mean Square Error', strong('RMSE'), 'which in this case is:'),
+            p('Models were trained using an 80/20 train/test split to minimize the Root Mean Square Error', strong('RMSE'), 'which in this case is:'),
             withMathJax(),
             p('$$\\mathrm{RMSE}=\\sqrt{\\frac{\\sum_{i=1}^{N}\\left(\\mathrm{Actual\\,Goals}_{i} - \\mathrm{Predicted\\,Goals}_{i}\\right)^{2}}N}$$'),
             p('The best model', em('and the one used in this Shiny application'), 'was an Extreme Gradient Boosted', strong('XGBoost'), 'model, it had an RMSE of approximately', strong('.3')),
