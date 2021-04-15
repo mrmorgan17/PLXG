@@ -61,7 +61,7 @@ ui <- dashboardPage(
       tabItem(
         tabName = 'introduction',
         titlePanel(
-          h1('Premier League Expected Goals (PLXG)', align = 'center')
+          h1('Premier League eXpected Goals (PLXG)', align = 'center')
         ),
         br(),
         fluidRow(
@@ -70,7 +70,7 @@ ui <- dashboardPage(
             title = p(icon('bullseye'), 'Goal'),
             width = 10,
             collapsible = TRUE,
-            p(em('To predict Expected Goals (XG) per match for Premier League teams'))
+            p(em('To predict eXpected Goals (XG) per match for Premier League teams'))
           )
         ),
         fluidRow(
@@ -131,7 +131,7 @@ ui <- dashboardPage(
       tabItem(
         tabName = 'example',
         titlePanel(
-          h1('Premier League Expected Goals (PLXG)', align = 'center')
+          h1('Premier League eXpected Goals (PLXG)', align = 'center')
         ),
         br(),
         fluidRow(
@@ -286,7 +286,7 @@ ui <- dashboardPage(
       tabItem(
         tabName = 'calculate',
         titlePanel(
-          h1('Premier League Expected Goals (PLXG)', align = 'center')
+          h1('Premier League eXpected Goals (PLXG)', align = 'center')
         ),
         br(),
         fluidRow(
@@ -462,7 +462,7 @@ ui <- dashboardPage(
       tabItem(
         tabName = 'visualization',
         titlePanel(
-          h1('Premier League Expected Goals (PLXG)', align = 'center')
+          h1('Premier League eXpected Goals (PLXG)', align = 'center')
         ),
         fluidRow(
           column(
