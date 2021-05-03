@@ -9,11 +9,19 @@ pl_team_data <- vroom('Pl_team_match_data.csv') %>% mutate(Dist = ifelse(is.na(D
                                                            Opp_GK_AvgLen = ifelse(is.na(Opp_GK_AvgLen), 0, Opp_GK_AvgLen),
                                                            Opp_AvgDist = ifelse(is.na(Opp_AvgDist), 0, Opp_AvgDist))
 
-# Splitting the data into a training set and a test set
-split <- sample.split(pl_team_data$Goals, SplitRatio = 0.8)
+pl_team_data2 <- pl_team_data %>% select(-Opp_Saves, -Opp_Launched_Cmp, -Opp_Launched_Att, 
+                                         -Opp_Passes_Att, -Opp_Thr_Att, -Opp_Passes_AvgLen, 
+                                         -Opp_GK_Att, -Opp_GK_AvgLen, -Crosses_Att, -Opp_Crosses_Stp, 
+                                         -`Opp_#OPA`, -Opp_AvgDist, -Players_Tkl, -TklW, -Tkl_Def_3rd, 
+                                         -Tkl_Mid_3rd, -Tkl_Att_3rd, -Dribblers_Tkl, -Dribblers_Past,
+                                         -Press_Succ, -Press_Def_3rd, -Press_Mid_3rd, -Press_Att_3rd,
+                                         -Blocks_Sh, -Blocks_ShSv, -Blocks_Pass, -Int, -Clr, -Err) 
 
-pl_team_data.train <- subset(pl_team_data, split == TRUE)
-pl_team_data.test <- subset(pl_team_data, split == FALSE)
+# Splitting the data into a training set and a test set
+split <- sample.split(pl_team_data2$Goals, SplitRatio = 0.8)
+
+pl_team_data.train <- subset(pl_team_data2, split == TRUE)
+pl_team_data.test <- subset(pl_team_data2, split == FALSE)
 
 test.Goals <- pl_team_data.test %>% pull(Goals)
 
@@ -100,8 +108,36 @@ sqrt(mean((test.Goals - xgbTree2.rounded.preds)^2))
 # Saving this model as an RDS object so it can be used by the Shiny app
 saveRDS(xgbTree2.model, '/Users/matthewmorgan/Documents/Stat 495R/PLXG/PLXG App/PLXGModel.RData')
 
+# Building an xgbTree model with only the 10 most important variables from varImp(xgbTree.model)
+xgbTree3.model <- train(Goals ~ .,
+                        data = pl_team_data.train,
+                        method = 'xgbTree',
+                        trControl = trainControl(method = 'cv', number = 10),
+                        # tuneLength = 4,
+                        tuneGrid = expand.grid(nrounds = c(800, 900, 1000),
+                                               max_depth = 1,
+                                               eta = c(.03, .04, .045, .05),
+                                               gamma = 0,
+                                               colsample_bytree = .85,
+                                               min_child_weight = 1,
+                                               subsample = c(.35, .4, .45)),
+                        maximize = FALSE)
+
+xgbTree3.model
+# .3310949
+
+xgbTree3.preds <- predict(xgbTree3.model, pl_team_data.test)
+
+xgbTree3.rounded.preds <- round(xgbTree3.preds)
+xgbTree3.rounded.preds <- ifelse(xgbTree3.rounded.preds < 0, 0, xgbTree3.rounded.preds)
+
+sqrt(mean((test.Goals - xgbTree3.preds)^2))
+# .3208364
+
+sqrt(mean((test.Goals - xgbTree3.rounded.preds)^2))
+
 # Poisson Regression
-summary(m1 <- glm(Goals ~ ., family = 'poisson', data = pl1920.train))
+summary(m1 <- glm(Goals ~ ., family = 'poisson', data = pl_team_data.train))
 
 m1.preds <- predict(m1, pl_team_data.test)
 
@@ -117,12 +153,11 @@ ranger.model <- train(Goals ~ .,
                       data = pl_team_data.train,
                       method = 'ranger',
                       trControl = trainControl(method = 'cv', number = 10),
-                      preProcess = c('nzv'),
-                      tuneGrid = expand.grid(mtry = 101,
+                      preProcess = c('nzv', 'center', 'scale'),
+                      tuneGrid = expand.grid(mtry = 10, 60,
                                              splitrule = 'variance',
                                              min.node.size = 5),
-                      maximize = FALSE 
-)
+                      maximize = FALSE)
 
 ranger.model
 
@@ -141,9 +176,8 @@ rf.model <- train(Goals ~ .,
                   method = 'rf',
                   trControl = trainControl(method = 'cv', number = 10),
                   preProcess = c('nzv'),
-                  tuneGrid = expand.grid(mtry = 101),
-                  maximize = FALSE 
-)
+                  tuneGrid = expand.grid(mtry = 73),
+                  maximize = FALSE)
 
 rf.model
 
@@ -161,10 +195,11 @@ xgbLinear.model <- train(Goals ~ .,
                          data = pl_team_data.train,
                          method = 'xgbLinear',
                          trControl = trainControl(method = 'cv', number = 10),
-                         tuneGrid = expand.grid(nrounds = 100,
-                                                lambda = c(.001, .0015, .002),
-                                                alpha = .015,
-                                                eta = .001),
+                         tuneLength = 4,
+                         # tuneGrid = expand.grid(nrounds = 100,
+                         #                        lambda = c(.001, .0015, .002),
+                         #                        alpha = .015,
+                         #                        eta = .001),
                          maximize = FALSE)
 
 xgbLinear.model

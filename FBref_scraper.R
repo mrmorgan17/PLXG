@@ -65,7 +65,7 @@ for (i in 1:3) {
 # Bind all the elements of the list together into a data frame
 pl_teams <- do.call(rbind, pl_teams)
 
-# Labeling the tbale types to reference in calling the right html addresses
+# Labeling the table types to reference in calling the right html addresses
 table_types = c('shooting', 'keeper', 'passing', 'passing_types', 'gca', 'defense', 'possession')
 
 ##############
@@ -98,9 +98,9 @@ for (i in 1:nrow(pl_teams)) {
     data.frame()
   
   names(Pl_team_shooting[[i]]) <- Pl_team_shooting[[i]][1,]
-  
+
   Pl_team_shooting[[i]]$Team <- pl_teams$team[i]
-  
+
   Pl_team_shooting[[i]] <- Pl_team_shooting[[i]][seq(2, nrow(Pl_team_shooting[[i]]) - 2, by = 2),] %>% select(Goals = GF, Team, Date, Round, Venue, Opponent, Sh, SoT, Dist, FK, PKatt)
 }
 
@@ -424,3 +424,9 @@ Pl_team_match_data <- cbind(Pl_team_shooting_df,
                             Pl_team_possession_df)
 
 write.csv(Pl_team_match_data, '~/Documents/Stat 495R/Pl_team_match_data.csv', row.names = FALSE)
+
+Pl_team_match_data2 <- cbind(Pl_team_shooting_df, 
+                             Pl_team_passing_df,
+                             Pl_team_passing_types_df,
+                             Pl_team_gca_df,
+                             Pl_team_possession_df)
