@@ -13,20 +13,27 @@ pl_season_href <- pl_season_list %>%
   html_attr("href") %>% 
   data.frame() 
 
+# Remove any rows that don't have a year
+# pl_season_href <- subset(pl_season_href, str_detect(pl_season_href[,1], '20|19'))
+
+pl_season_href <- data.frame(pl_season_href[3:30,1])
+
 # Extract the unique identifier for each season
 season_tag <- str_extract_all(pl_season_href[,1], '[:graph:]+(?=\\-Premier)') %>% 
   str_split(., '\\/') %>% 
   unlist() %>% 
-  .[seq(6, length(.), 6)]
+  .[seq(5, length(.), 6)]
 
 # Extract the years for which the season ran (ex: 2019-2020)
 season <- str_extract_all(pl_season_href[,1], '[:graph:]+(?=\\-Premier)') %>% 
   str_split(., '\\/') %>% 
   unlist() %>% 
-  .[seq(7, length(.), 6)]
+  .[seq(6, length(.), 6)]
 
 # Create a data frame with each season and its unique identifier
 pl_season_href <- data.frame(season = season, season_tag = season_tag)
+
+pl_season_href <- rbind(data.frame(season = "", season_tag = ""), pl_season_href)
 
 pl_team_list <- list()
 pl_team_df <- list()
@@ -35,8 +42,30 @@ team_tag <- list()
 team <- list()
 pl_teams <- list()
 
-for (i in 1:3) {
-  pl_team_list[[i]] <- read_html(paste0('https://fbref.com/en/comps/9/', season_tag[i], '/', season[i], '-Premier-League-Stats'))
+# pl_team_list <- read_html(paste0('https://fbref.com/en/comps/9/', pl_season_href$season_tag[2], '/', pl_season_href$season[2], '-Premier-League-Stats'))
+# 
+# pl_team_df <- pl_team_list %>% 
+#   html_table()
+# 
+# pl_team_href <- pl_team_list %>% 
+#   html_nodes("td") %>%
+#   html_nodes("a") %>%
+#   html_attr("href") %>% 
+#   data.frame() %>% 
+#   filter(str_detect(., 'squads') == TRUE) %>% 
+#   unique()
+# 
+# team_tag <- do.call(rbind, str_extract_all(pl_team_href[,1], '(?<=\\/)[:alnum:]{8}(?=\\/)'))
+# 
+# team <- str_extract_all(pl_team_href[,1], '[:graph:]+(?=\\-Stats)') %>% 
+#   str_split(., '\\/') %>% 
+#   unlist() %>% 
+#   .[seq(6, length(.), 6)]
+# 
+# pl_teams <- data.frame(team = team, team_tag = team_tag, season = pl_season_href$season[2], season_tag = pl_season_href$season_tag[2])
+
+for (i in 1:4) {
+  pl_team_list[[i]] <- read_html(paste0('https://fbref.com/en/comps/9/', pl_season_href$season_tag[i], '/', pl_season_href$season[i], '-Premier-League-Stats'))
   
   pl_team_df[[i]] <- pl_team_list[[i]] %>% 
     html_table()
@@ -48,18 +77,30 @@ for (i in 1:3) {
     data.frame() %>% 
     filter(str_detect(., 'squads') == TRUE) %>% 
     unique()
-  
+
   # Extract the unique identifier for each Premier League team
   team_tag[[i]] <- do.call(rbind, str_extract_all(pl_team_href[[i]][,1], '(?<=\\/)[:alnum:]{8}(?=\\/)'))
   
   # Extract the name of the team (ex: Manchester-United)
-  team[[i]] <- str_extract_all(pl_team_href[[i]][,1], '[:graph:]+(?=\\-Stats)') %>% 
-    str_split(., '\\/') %>% 
-    unlist() %>% 
-    .[seq(6, length(.), 6)]
+  if (i == 1) {
+    team[[i]] <- str_extract_all(pl_team_href[[i]][,1], '[:graph:]+(?=\\-Stats)') %>% 
+      str_split(., '\\/') %>% 
+      unlist() %>% 
+      .[seq(5, length(.), 5)]
+  } else {
+    team[[i]] <- str_extract_all(pl_team_href[[i]][,1], '[:graph:]+(?=\\-Stats)') %>% 
+      str_split(., '\\/') %>% 
+      unlist() %>% 
+      .[seq(6, length(.), 6)]
+  }
+  
+  # team[[i]] <- str_extract_all(pl_team_href[[i]][,1], '[:graph:]+(?=\\-Stats)') %>% 
+  #   str_split(., '\\/') %>% 
+  #   unlist() %>% 
+  #   .[seq(5, length(.), 5)]
   
   # Create a one row data frame with the team name, their unique identifier, the season, and the season's unique identifier
-  pl_teams[[i]] <- data.frame(team = team[[i]], team_tag = team_tag[[i]], season = season[i], season_tag = season_tag[i])
+  pl_teams[[i]] <- data.frame(team = team[[i]], team_tag = team_tag[[i]], season = pl_season_href$season[i], season_tag = pl_season_href$season_tag[i])
 }
 
 # Bind all the elements of the list together into a data frame
